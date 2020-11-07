@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.MyGdxGame;
+import com.stk.nns.food.Food;
 import com.stk.nns.map.Map;
 
 import java.util.ArrayList;
@@ -15,7 +16,8 @@ public class Snake {
     List<Vector2> body;
 
     Vector2 direction = new Vector2(0,-1);
-    private int startingLength = 20;
+
+    private int startingLength = 2;
 
     public Snake(Vector2 startPos) {
         body = new ArrayList<>();
@@ -87,4 +89,15 @@ public class Snake {
         }
         return false;
     }
+
+    public boolean eat(Food food) {
+        if (food.getPosition().equals(body.get(0))) {
+            Vector2 lastSegment = body.get(body.size()-1);
+            body.add(new Vector2(lastSegment.x, lastSegment.y));
+            return true;
+        }
+        return false;
+    }
+
+
 }

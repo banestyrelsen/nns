@@ -2,20 +2,25 @@ package com.stk.nns.map;
 
 import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.MyGdxGame;
+import com.stk.nns.food.Food;
 import com.stk.nns.snake.Snake;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 public class Map {
 
     private Tile[][] tile;
 
     private List<Vector2> obstacles = new ArrayList<>();
+    private List<Vector2> emptyPositions = new ArrayList<>();
 
     private Snake snake;
+
+    Random rnd = new Random();
 
     public Map(String fileName) {
         File file = new File(fileName);    //creates a new file instance
@@ -44,11 +49,29 @@ public class Map {
                 tile[x][y] = new Tile(Integer.parseInt(String.valueOf(line.charAt(x))), new Vector2(x * MyGdxGame.TILESIZE, y * MyGdxGame.TILESIZE));
                 if (tile[x][y].getValue() == 1) {
                     obstacles.add(tile[x][y].getPosition());
+                } else {
+                    emptyPositions.add(tile[x][y].getPosition());
                 }
             }
         }
 
         System.out.println("Done");
+    }
+
+    public void placeFood(Food food, Snake snake) {
+        boolean positionFound = false;
+        Vector2 candidate = null;
+        while (!positionFound) {
+            candidate = emptyPositions.get(rnd.nextInt(emptyPositions.size()));
+            for (Vector2 segment : snake.getBody()) {
+                if (segment.equals(candidate)) {
+
+                    break;
+                }
+            }
+            positionFound = true;
+        }
+        food.setPosition(new Vector2(candidate.x, candidate.y));
     }
 
     public Tile[][] getTile() {
@@ -62,5 +85,9 @@ public class Map {
 
     public List<Vector2> getObstacles() {
         return obstacles;
+    }
+
+    public List<Vector2> getEmptyPositions() {
+        return emptyPositions;
     }
 }

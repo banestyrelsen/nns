@@ -2,6 +2,8 @@ package com.stk.nns;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -9,6 +11,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.stk.nns.food.Food;
 import com.stk.nns.input.InputHandler;
 import com.stk.nns.map.Map;
 import com.stk.nns.map.Tile;
@@ -23,7 +26,9 @@ import java.util.Random;
 public class MyGdxGame extends ApplicationAdapter {
     SpriteBatch batch;
     Texture tileWhite;
+    Texture tileGreen;
     Map map;
+    Food food;
     BasicScreen basicScreen;
     private OrthographicCamera camera;
 
@@ -33,10 +38,19 @@ public class MyGdxGame extends ApplicationAdapter {
     Snake snake;
     Instant timeStarted;
     Instant prevSnakeUpdate;
+    Instant lastAte;
+    Sound eatSound;
+    Sound burpSound;
+    Sound gameOverSound;
 
     public static final int TILESIZE = 32;
 
     private boolean GAME_OVER = false;
+
+    Random rnd = new Random();
+
+    boolean hasBurped = false;
+    boolean shouldBurp = false;
 
     @Override
     public void create() {
@@ -51,8 +65,15 @@ public class MyGdxGame extends ApplicationAdapter {
         batch = new SpriteBatch();
         /*		img = new Texture("badlogic.jpg");*/
         tileWhite = new Texture("tile_white.png");
+        tileGreen= new Texture("tile_green.png");
+        eatSound = Gdx.audio.newSound(Gdx.files.internal("sound/apple-crunch.wav"));
+        gameOverSound = Gdx.audio.newSound(Gdx.files.internal("sound/fart2.wav"));
+        burpSound = Gdx.audio.newSound(Gdx.files.internal("sound/burp1.wav"));
+        newGame();
+    }
 
-
+    private void newGame() {
+        GAME_OVER = false;
         map = new Map("maps/map1.map");
 
         basicScreen = new BasicScreen(map, camera, batch, tileWhite);
@@ -66,6 +87,9 @@ public class MyGdxGame extends ApplicationAdapter {
         snake = new Snake(new Vector2(TILESIZE * 16, TILESIZE * 16));
         timeStarted = Instant.now();
         prevSnakeUpdate = timeStarted;
+
+        food = new Food();
+        map.placeFood(food, snake);
     }
 
     @Override
@@ -74,9 +98,13 @@ public class MyGdxGame extends ApplicationAdapter {
             batch.begin();
             font.draw(batch, "GAME OVER", TILESIZE * 24, TILESIZE * 16);
             batch.end();
+            if (Gdx.input.isKeyPressed(Input.Keys.ENTER)) {
+                newGame();
+            }
+
         } else {
 
-            Gdx.gl.glClearColor(0, 0, 0, 1);
+            Gdx.gl.glClearColor(Color.BLACK.r, Color.BLACK.g, Color.BLACK.b, 1);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
             batch.setProjectionMatrix(camera.combined);
@@ -84,10 +112,27 @@ public class MyGdxGame extends ApplicationAdapter {
             batch.begin();
             if (snake.collide(map.getObstacles())) {
                 GAME_OVER = true;
+                gameOverSound.play();
                 /*			Gdx.app.exit();*/
             }
 
-            if (Instant.now().toEpochMilli() - prevSnakeUpdate.toEpochMilli() > 50) {
+            if (snake.eat(food)) {
+                lastAte = Instant.now();
+                eatSound.play();
+                if (rnd.nextFloat() <= 0.33f) {
+                    shouldBurp = true;
+                    hasBurped = false;
+                }
+                map.placeFood(food, snake);
+            }
+
+            if (Instant.now().toEpochMilli() - prevSnakeUpdate.toEpochMilli() > 80) {
+                if (shouldBurp && !hasBurped && Instant.now().toEpochMilli() - lastAte.toEpochMilli() > 800 ) {
+                    burpSound.play();
+                    shouldBurp = false;
+                    hasBurped = false;
+
+                }
                 snake.update();
                 prevSnakeUpdate = Instant.now();
             }
@@ -111,6 +156,8 @@ public class MyGdxGame extends ApplicationAdapter {
                     }
                 }
             }
+
+            batch.draw(tileGreen, food.getPosition().x, food.getPosition().y);
 
             for (Vector2 segment : snake.getBody()) {
                 batch.draw(tileWhite, segment.x, segment.y);
