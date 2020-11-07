@@ -21,103 +21,111 @@ import java.util.List;
 import java.util.Random;
 
 public class MyGdxGame extends ApplicationAdapter {
-	SpriteBatch batch;
-	Texture tileWhite;
-	Map map;
-	BasicScreen basicScreen;
-	private OrthographicCamera camera;
+    SpriteBatch batch;
+    Texture tileWhite;
+    Map map;
+    BasicScreen basicScreen;
+    private OrthographicCamera camera;
 
-	public static int WIDTH;
-	public static int HEIGHT;
-	BitmapFont font;
-	Snake snake;
-	Instant timeStarted;
-	Instant prevSnakeUpdate;
+    public static int WIDTH;
+    public static int HEIGHT;
+    BitmapFont font;
+    Snake snake;
+    Instant timeStarted;
+    Instant prevSnakeUpdate;
 
-	public static final int TILESIZE = 32;
+    public static final int TILESIZE = 32;
 
-	@Override
-	public void create () {
-		WIDTH = Gdx.graphics.getWidth();
-		HEIGHT = Gdx.graphics.getHeight();
-		System.out.println("---------------->>>>>>>>>>>>>>>>> " + Gdx.graphics.getWidth() + ", " + Gdx.graphics.getHeight());
-		camera  = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		camera.zoom = -2f;
-		camera.update();
+    private boolean GAME_OVER = false;
 
-		batch = new SpriteBatch();
-/*		img = new Texture("badlogic.jpg");*/
-		tileWhite = new Texture("tile_white.png");
+    @Override
+    public void create() {
+        WIDTH = Gdx.graphics.getWidth();
+        HEIGHT = Gdx.graphics.getHeight();
+        System.out.println("---------------->>>>>>>>>>>>>>>>> " + Gdx.graphics.getWidth() + ", " + Gdx.graphics.getHeight());
+        camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.zoom = -2f;
+        camera.update();
 
-
-		map = new Map("maps/map1.map");
-
-		basicScreen = new BasicScreen(map, camera, batch, tileWhite);
-
-		font = new BitmapFont();
-		font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-		font.setColor(Color.WHITE);
-		font.getData().setScale(0.9f);
-		font.getData().markupEnabled = true;
-
-		snake = new Snake(new Vector2(32*16, 32* 16));
-		timeStarted = Instant.now();
-		prevSnakeUpdate = timeStarted;
-	}
-
-	@Override
-	public void render () {
-
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-		batch.setProjectionMatrix(camera.combined);
-
-/*		basicScreen.render(1f);*/
+        batch = new SpriteBatch();
+        /*		img = new Texture("badlogic.jpg");*/
+        tileWhite = new Texture("tile_white.png");
 
 
+        map = new Map("maps/map1.map");
 
-		batch.begin();
+        basicScreen = new BasicScreen(map, camera, batch, tileWhite);
 
-		Tile[][] tile = map.getTile();
-		Vector2 size = map.getSize();
+        font = new BitmapFont(Gdx.files.internal("fonts/square-deal.fnt"), true);
+        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        font.setColor(Color.RED);
+        font.getData().setScale(-1,1);
+        font.getData().markupEnabled = true;
 
-		batch.setProjectionMatrix(camera.combined);
-/*		batch.begin();*/
-Random rnd = new Random();
+        snake = new Snake(new Vector2(TILESIZE * 16, TILESIZE * 16));
+        timeStarted = Instant.now();
+        prevSnakeUpdate = timeStarted;
+    }
 
-		for (int x = 0; x < size.x; x++) {
+    @Override
+    public void render() {
+        if (GAME_OVER) {
+            batch.begin();
+            font.draw(batch, "GAME OVER", TILESIZE * 24, TILESIZE * 16);
+            batch.end();
+        } else {
 
-			for (int y = 0; y < size.y; y++) {
-				if (tile[x][y].getValue() == 1) {
-					batch.draw(tileWhite, tile[x][y].getPosition().x, tile[x][y].getPosition().y);
-					if (rnd.nextInt(100) == 1)
-					System.out.println("MAP: " + tile[x][y].getPosition().x +","+ tile[x][y].getPosition().y);
-				}
-			}
-		}
+            Gdx.gl.glClearColor(0, 0, 0, 1);
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		for (Vector2 segment : snake.getBody()) {
-			if (rnd.nextInt(100) == 1)
-			System.out.println("SNAKE: " + segment.x + ","+segment.y);
-			batch.draw(tileWhite, segment.x, segment.y);
-		}
+            batch.setProjectionMatrix(camera.combined);
 
-		batch.end();
+            batch.begin();
+            if (snake.collide(map.getObstacles())) {
+                GAME_OVER = true;
+                /*			Gdx.app.exit();*/
+            }
+
+            if (Instant.now().toEpochMilli() - prevSnakeUpdate.toEpochMilli() > 50) {
+                snake.update();
+                prevSnakeUpdate = Instant.now();
+            }
 
 
-		if (Instant.now().toEpochMilli() - prevSnakeUpdate.toEpochMilli() > 100) {
-			snake.update();
-			prevSnakeUpdate = Instant.now();
-		}
+            /*		basicScreen.render(1f);*/
 
-		InputHandler.handleInput();
-	}
-	
-	@Override
-	public void dispose () {
-		batch.dispose();
-		tileWhite.dispose();
-	}
+
+            Tile[][] tile = map.getTile();
+            Vector2 size = map.getSize();
+
+            batch.setProjectionMatrix(camera.combined);
+            /*		batch.begin();*/
+
+
+            for (int x = 0; x < size.x; x++) {
+
+                for (int y = 0; y < size.y; y++) {
+                    if (tile[x][y].getValue() == 1) {
+                        batch.draw(tileWhite, tile[x][y].getPosition().x, tile[x][y].getPosition().y);
+                    }
+                }
+            }
+
+            for (Vector2 segment : snake.getBody()) {
+                batch.draw(tileWhite, segment.x, segment.y);
+            }
+
+            batch.end();
+
+        }
+        InputHandler.handleInput();
+
+    }
+
+    @Override
+    public void dispose() {
+        batch.dispose();
+        tileWhite.dispose();
+    }
 }
