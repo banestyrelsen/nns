@@ -1,6 +1,7 @@
 package com.stk.nns.map;
 
 import com.badlogic.gdx.math.Vector2;
+import com.stk.nns.MyGdxGame;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class Map {
         for (int y = 0; y < lines.size(); y++) {
             String line = lines.get(y);
             for (int x = 0; x < line.length(); x++) {
-                tile[x][y] = new Tile(Integer.parseInt(String.valueOf(line.charAt(x))));
+                tile[x][y] = new Tile(Integer.parseInt(String.valueOf(line.charAt(x))), new Vector2(x * MyGdxGame.TILESIZE, y* MyGdxGame.TILESIZE));
              }
         }
         System.out.println("Done");

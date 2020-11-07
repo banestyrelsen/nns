@@ -40,7 +40,8 @@ public class BasicScreen implements com.badlogic.gdx.Screen {
 
             for (int y = 0; y < size.y; y++) {
                 if (tile[x][y].getValue() == 1) {
-                    batch.draw(tileWhite, x * 32, y * 32);
+                    batch.draw(tileWhite, tile[x][y].getPosition().x, tile[x][y].getPosition().y);
+                    System.out.println("MAP: " + tile[x][y].getPosition().x +","+ tile[x][y].getPosition().y);
                 }
             }
         }

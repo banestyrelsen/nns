@@ -2,16 +2,23 @@ package com.stk.nns;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.stk.nns.input.InputHandler;
 import com.stk.nns.map.Map;
+import com.stk.nns.map.Tile;
 import com.stk.nns.screen.BasicScreen;
+import com.stk.nns.snake.Snake;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class MyGdxGame extends ApplicationAdapter {
 	SpriteBatch batch;
@@ -22,8 +29,12 @@ public class MyGdxGame extends ApplicationAdapter {
 
 	public static int WIDTH;
 	public static int HEIGHT;
+	BitmapFont font;
+	Snake snake;
+	Instant timeStarted;
+	Instant prevSnakeUpdate;
 
-
+	public static final int TILESIZE = 32;
 
 	@Override
 	public void create () {
@@ -43,6 +54,16 @@ public class MyGdxGame extends ApplicationAdapter {
 		map = new Map("maps/map1.map");
 
 		basicScreen = new BasicScreen(map, camera, batch, tileWhite);
+
+		font = new BitmapFont();
+		font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+		font.setColor(Color.WHITE);
+		font.getData().setScale(0.9f);
+		font.getData().markupEnabled = true;
+
+		snake = new Snake(new Vector2(32*16, 32* 16));
+		timeStarted = Instant.now();
+		prevSnakeUpdate = timeStarted;
 	}
 
 	@Override
@@ -52,11 +73,46 @@ public class MyGdxGame extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		batch.setProjectionMatrix(camera.combined);
+
+/*		basicScreen.render(1f);*/
+
+
+
 		batch.begin();
-		batch.draw(tileWhite, 200, 200);
+
+		Tile[][] tile = map.getTile();
+		Vector2 size = map.getSize();
+
+		batch.setProjectionMatrix(camera.combined);
+/*		batch.begin();*/
+Random rnd = new Random();
+
+		for (int x = 0; x < size.x; x++) {
+
+			for (int y = 0; y < size.y; y++) {
+				if (tile[x][y].getValue() == 1) {
+					batch.draw(tileWhite, tile[x][y].getPosition().x, tile[x][y].getPosition().y);
+					if (rnd.nextInt(100) == 1)
+					System.out.println("MAP: " + tile[x][y].getPosition().x +","+ tile[x][y].getPosition().y);
+				}
+			}
+		}
+
+		for (Vector2 segment : snake.getBody()) {
+			if (rnd.nextInt(100) == 1)
+			System.out.println("SNAKE: " + segment.x + ","+segment.y);
+			batch.draw(tileWhite, segment.x, segment.y);
+		}
+
 		batch.end();
 
-		basicScreen.render(1f);
+
+		if (Instant.now().toEpochMilli() - prevSnakeUpdate.toEpochMilli() > 100) {
+			snake.update();
+			prevSnakeUpdate = Instant.now();
+		}
+
+		InputHandler.handleInput();
 	}
 	
 	@Override
