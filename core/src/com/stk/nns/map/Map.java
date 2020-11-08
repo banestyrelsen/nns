@@ -48,7 +48,8 @@ public class Map {
             String line = lines.get(y);
             System.out.println(line);
             for (int x = 0; x < line.length(); x++) {
-                tile[x][y] = new Tile(Integer.parseInt(String.valueOf(line.charAt(x))), new Vector2(x * Main.TILESIZE, y * Main.TILESIZE));
+                tile[x][y] = new Tile(Integer.parseInt(String.valueOf(line.charAt(x))),
+                        new Vector2(x * Main.TILESIZE, lines.size()-y * Main.TILESIZE + Main.TILESIZE * 32));
                 if (tile[x][y].getValue() == 1) {
                     System.out.println("obstacle at: " + x + "," + y);
                     obstacles.add(tile[x][y].getPosition());
@@ -59,17 +60,34 @@ public class Map {
         }
 
         System.out.println("Done");
+
+        for (int y = 0; y < tile.length; y++) {
+            for (int x = 0; x < tile.length; x++) {
+                System.out.print(tile[x][y].getValue());
+            }
+            System.out.print("\n");
+        }
     }
 
     public void render(SpriteBatch batch, Texture tileWall) {
+
         Vector2 size = getSize();
+
+        for (int y = 0; y < tile.length; y++) {
+            for (int x = 0; x < tile.length; x++) {
+                if (tile[x][y].getValue() == 1) {
+                    batch.draw(tileWall, tile[x][y].getPosition().x, tile[x][y].getPosition().y);
+                }
+            }
+        }
+/*
         for (int x = 0; x < size.x; x++) {
             for (int y = 0; y < size.y; y++) {
                 if (tile[x][y].getValue() == 1) {
                     batch.draw(tileWall, tile[x][y].getPosition().x, tile[x][y].getPosition().y);
                 }
             }
-        }
+        }*/
     }
 
     public void placeFood(Food food, Snake snake) {

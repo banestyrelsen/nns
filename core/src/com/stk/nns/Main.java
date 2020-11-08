@@ -42,17 +42,18 @@ public class Main extends ApplicationAdapter {
     @Override
     public void create() {
         playSound = new PlaySound();
-        mainFontRed = new BitmapFont(Gdx.files.internal("fonts/square-deal.fnt"), false);
-        mainFontRed.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        mainFontRed.setColor(Color.RED);
-        mainFontRed.getData().setScale(1, 1);
-        mainFontRed.getData().markupEnabled = true;
 
         mainFont = new BitmapFont(Gdx.files.internal("fonts/square-deal.fnt"), false);
         mainFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         mainFont.setColor(Color.WHITE);
         mainFont.getData().setScale(1, 1);
         mainFont.getData().markupEnabled = true;
+
+        mainFontRed = new BitmapFont(Gdx.files.internal("fonts/square-deal.fnt"), false);
+        mainFontRed.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        mainFontRed.setColor(Color.RED);
+        mainFontRed.getData().setScale(1, 1);
+        mainFontRed.getData().markupEnabled = true;
 
         menu = new Menu(playSound, mainFont);
 

@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.stk.nns.food.Food;
 import com.stk.nns.input.BoardInputProcessor;
 import com.stk.nns.map.Map;
@@ -60,6 +61,9 @@ public class Board {
         camera.zoom = 1.5f;
         camera.update();
 
+
+
+
         batch = new SpriteBatch();
         /*		img = new Texture("badlogic.jpg");*/
         tileWall = new Texture("tile_wall.png");
@@ -81,14 +85,8 @@ public class Board {
     }
 
     private void newGame() {
-
         GAME_OVER = false;
-
-
-        /*        basicScreen = new BasicScreen(map, camera, batch, tileWall);*/
-
-
-        snake = new Snake(new Vector2(TILESIZE * 16, TILESIZE * 16), map.getObstacles(), playSound);
+        snake = new Snake(new Vector2(TILESIZE * 16, TILESIZE * 8), map.getObstacles(), playSound);
         timeStarted = Instant.now();
         prevSnakeUpdate = timeStarted;
 
@@ -137,7 +135,8 @@ public class Board {
 
             // Draw score
             batch.begin();
-            mainFont.draw(batch, "" + snake.getnFeedings(), TILESIZE * 30, TILESIZE * 35);
+            mainFont.draw(batch, "" + snake.getnFeedings(), TILESIZE * 30, TILESIZE * 37);
+/*            mainFont.draw(batch,  snake.getBody().get(0).x + "," + snake.getBody().get(0).y, TILESIZE * 0, TILESIZE * 35);*/
             batch.end();
 
             batch.begin();
