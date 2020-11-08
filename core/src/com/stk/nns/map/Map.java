@@ -3,13 +3,12 @@ package com.stk.nns.map;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
-import com.stk.nns.MyGdxGame;
+import com.stk.nns.Main;
 import com.stk.nns.food.Food;
 import com.stk.nns.snake.Snake;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -49,7 +48,7 @@ public class Map {
             String line = lines.get(y);
             System.out.println(line);
             for (int x = 0; x < line.length(); x++) {
-                tile[x][y] = new Tile(Integer.parseInt(String.valueOf(line.charAt(x))), new Vector2(x * MyGdxGame.TILESIZE, y * MyGdxGame.TILESIZE));
+                tile[x][y] = new Tile(Integer.parseInt(String.valueOf(line.charAt(x))), new Vector2(x * Main.TILESIZE, y * Main.TILESIZE));
                 if (tile[x][y].getValue() == 1) {
                     System.out.println("obstacle at: " + x + "," + y);
                     obstacles.add(tile[x][y].getPosition());

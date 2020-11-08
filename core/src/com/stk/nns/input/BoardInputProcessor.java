@@ -7,14 +7,14 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.snake.Snake;
 
-public class InputHandler implements InputProcessor {
+public class BoardInputProcessor implements InputProcessor {
 
 
     private Snake snake;
     private OrthographicCamera camera;
     private Vector2 direction = new Vector2(0,1);
 
-    public InputHandler(OrthographicCamera camera, Snake snake) {
+    public BoardInputProcessor(OrthographicCamera camera, Snake snake) {
         this.camera = camera;
         this.snake = snake;
     }
@@ -29,8 +29,6 @@ public class InputHandler implements InputProcessor {
             Gdx.app.exit();
         }
 
-
-
         if (keycode == Input.Keys.LEFT ||
                 keycode ==  Input.Keys.RIGHT ||
                 keycode ==  Input.Keys.UP ||
@@ -38,22 +36,6 @@ public class InputHandler implements InputProcessor {
             snake.setNextMove(keycode);
             return true;
         }
-/*                direction.x = -1;
-                direction.y = 0;
-            snake.setNewDirection(direction);
-        } else if (keycode ==  Input.Keys.RIGHT) {
-                direction.x = 1;
-                direction.y = 0;
-            snake.setNewDirection(direction);
-        } else if (keycode ==  Input.Keys.UP) {
-                direction.x = 0;
-                direction.y = 1;
-            snake.setNewDirection(direction);
-        } else if (keycode ==  Input.Keys.DOWN) {
-                direction.x = 0;
-                direction.y = -1;
-            snake.setNewDirection(direction);
-        }*/
 
 
         return true;

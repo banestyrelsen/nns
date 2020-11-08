@@ -2,7 +2,6 @@ package com.stk.nns;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -11,12 +10,11 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.food.Food;
-import com.stk.nns.input.InputHandler;
+import com.stk.nns.input.BoardInputProcessor;
 import com.stk.nns.map.Map;
 import com.stk.nns.snake.Snake;
 
 import java.time.Instant;
-import java.util.Random;
 
 public class Board {
     SpriteBatch batch;
@@ -26,39 +24,33 @@ public class Board {
     Map map;
     Food food;
     private OrthographicCamera camera;
-    InputHandler inputHandler;
-
+    BoardInputProcessor boardInputProcessor;
 
     public static int WIDTH;
     public static int HEIGHT;
-    BitmapFont gameOverFont;
-    BitmapFont scoreFont;
+
     Snake snake;
     Instant timeStarted;
     Instant prevSnakeUpdate;
-    Instant lastAte;
-    Sound eatSound;
-    Sound burpSound;
-    Sound gameOverSound;
-
-
 
     public static final int TILESIZE = 32;
 
     private boolean GAME_OVER = false;
-
-    Random rnd = new Random();
-
-    boolean hasBurped = false;
-    boolean shouldBurp = false;
-
+    BitmapFont mainFont;
+    BitmapFont mainFontRed;
     PlaySound playSound;
 
     public Board(PlaySound playSound) {
         this.playSound = playSound;
     }
 
-    public void create() {
+    public BoardInputProcessor getBoardInputProcessor() {
+        return boardInputProcessor;
+    }
+
+    public void create(BitmapFont mainFont, BitmapFont mainFontRed) {
+        this.mainFont = mainFont;
+        this.mainFontRed = mainFontRed;
         WIDTH = Gdx.graphics.getWidth();
         HEIGHT = Gdx.graphics.getHeight();
         map = new Map("maps/map1.map");
@@ -75,9 +67,9 @@ public class Board {
         tileFood = new Texture("tile_food.png");
 
 
-        inputHandler = new InputHandler(camera, snake);
+        boardInputProcessor = new BoardInputProcessor(camera, snake);
 
-        Gdx.input.setInputProcessor(inputHandler);
+        Gdx.input.setInputProcessor(boardInputProcessor);
 
         try {
             Thread.sleep(500);
@@ -93,19 +85,8 @@ public class Board {
         GAME_OVER = false;
 
 
-/*        basicScreen = new BasicScreen(map, camera, batch, tileWall);*/
+        /*        basicScreen = new BasicScreen(map, camera, batch, tileWall);*/
 
-        gameOverFont = new BitmapFont(Gdx.files.internal("fonts/square-deal.fnt"), false);
-        gameOverFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        gameOverFont.setColor(Color.RED);
-        gameOverFont.getData().setScale(1, 1);
-        gameOverFont.getData().markupEnabled = true;
-
-        scoreFont = new BitmapFont(Gdx.files.internal("fonts/square-deal.fnt"), false);
-        scoreFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        scoreFont.setColor(Color.WHITE);
-        scoreFont.getData().setScale(1, 1);
-        scoreFont.getData().markupEnabled = true;
 
         snake = new Snake(new Vector2(TILESIZE * 16, TILESIZE * 16), map.getObstacles(), playSound);
         timeStarted = Instant.now();
@@ -114,7 +95,7 @@ public class Board {
         food = new Food();
         map.placeFood(food, snake);
 
-        inputHandler.setSnake(snake);
+        boardInputProcessor.setSnake(snake);
 
     }
 
@@ -143,7 +124,7 @@ public class Board {
         if (GAME_OVER) {
             // Draw game over screen
             batch.begin();
-            gameOverFont.draw(batch, "GAME OVER", TILESIZE * 8, TILESIZE * 16);
+            mainFontRed.draw(batch, "GAME OVER", TILESIZE * 8, TILESIZE * 16);
             batch.end();
             if (Gdx.input.isKeyPressed(Input.Keys.ENTER)) {
                 newGame();
@@ -156,7 +137,7 @@ public class Board {
 
             // Draw score
             batch.begin();
-            scoreFont.draw(batch, "" + snake.getnFeedings(), TILESIZE * 30, TILESIZE * 35);
+            mainFont.draw(batch, "" + snake.getnFeedings(), TILESIZE * 30, TILESIZE * 35);
             batch.end();
 
             batch.begin();

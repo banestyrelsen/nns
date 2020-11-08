@@ -4,24 +4,22 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
-import com.stk.nns.MyGdxGame;
+import com.stk.nns.Main;
 import com.stk.nns.PlaySound;
 import com.stk.nns.food.Food;
 
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 
 public class Snake {
 
     LinkedList<Vector2> body;
 
-    Vector2 newDirection = new Vector2(0, -1);
-    Vector2 direction = new Vector2(0, -1);
+    Vector2 direction;
     List<Vector2> obstaclePositions;
 
-    private int startingLength = 2;
+    private final int startingLength = 2;
     private int lastMove = Input.Keys.UP;
     private int nextMove = Input.Keys.UP;
     int nFeedings = 0;
@@ -38,34 +36,11 @@ public class Snake {
         }
         this.obstaclePositions = obstaclePositions;
         this.playSound = playSound;
-
+        this.direction = new Vector2(0, -1);
     }
 
     public void setNextMove(int nextMove) {
         this.nextMove = nextMove;
-    }
-
-    public void setNewDirection(Vector2 newDirection) {
-
-        this.newDirection.x = newDirection.x;
-        this.newDirection.y = newDirection.y;
-    }
-
-    public Vector2 getDirection() {
-        return new Vector2(direction.x, direction.y);
-    }
-
-    private String directionString(Vector2 direction) {
-        if (direction.x == -1 && direction.y == 0) {
-            return "LEFT";
-        } else if (direction.x == 1 && direction.y == 0) {
-            return "RIGHT";
-        } else if (direction.x == 0 && direction.y == 1) {
-            return "UP";
-        } else if (direction.x == 0 && direction.y == -1) {
-            return "DOWN";
-        }
-        return "?";
     }
 
     private void update() {
@@ -102,8 +77,8 @@ public class Snake {
 
 
         Vector2 newHead = new Vector2(
-                body.get(0).x + direction.x * MyGdxGame.TILESIZE,
-                body.get(0).y + direction.y * MyGdxGame.TILESIZE);
+                body.get(0).x + direction.x * Main.TILESIZE,
+                body.get(0).y + direction.y * Main.TILESIZE);
 
         if (collide(newHead)) {
             return false;

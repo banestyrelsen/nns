@@ -2,7 +2,7 @@ package com.stk.nns.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.stk.nns.MyGdxGame;
+import com.stk.nns.Main;
 
 public class DesktopLauncher {
 	public static final int VIRTUAL_WIDTH = 1080;
@@ -15,6 +15,6 @@ public class DesktopLauncher {
 		config.foregroundFPS = 60;
 		config.backgroundFPS = 60;
 		config.vSyncEnabled = false;
-		new LwjglApplication(new MyGdxGame(), config);
+		new LwjglApplication(new Main(), config);
 	}
 }
