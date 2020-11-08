@@ -28,36 +28,15 @@ public class Snake {
     }
 
     public void update() {
-        handleInput();
+        move();
     }
 
-    public void handleInput() {
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-/*            System.out.println("LEFT");*/
-            if (direction.x != -1 && direction.y != 0) {
-                direction.x = 1;
-                direction.y = 0;
-            }
-        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            /*System.out.println("RIGHT");*/
-            if (direction.x != 1 && direction.y != 0) {
-                direction.x = -1;
-                direction.y = 0;
-            }
-        } else if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-/*            System.out.println("UP");*/
-            if (direction.x != 0 && direction.y != 1) {
-                direction.x = 0;
-                direction.y = -1;
-            }
-        } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            /*            System.out.println("DOWN");*/
-            if (direction.x != 0 && direction.y != -1) {
-                direction.x = 0;
-                direction.y = 1;
-            }
-        }
-        move();
+    public void setDirection(Vector2 direction) {
+        this.direction = direction;
+    }
+
+    public Vector2 getDirection() {
+        return direction;
     }
 
     public void move() {

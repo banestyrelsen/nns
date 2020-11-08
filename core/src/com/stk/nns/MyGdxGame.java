@@ -19,8 +19,6 @@ import com.stk.nns.screen.BasicScreen;
 import com.stk.nns.snake.Snake;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 public class MyGdxGame extends ApplicationAdapter {
@@ -31,10 +29,13 @@ public class MyGdxGame extends ApplicationAdapter {
     Food food;
     BasicScreen basicScreen;
     private OrthographicCamera camera;
+    InputHandler inputHandler;
+
 
     public static int WIDTH;
     public static int HEIGHT;
-    BitmapFont font;
+    BitmapFont gameOverFont;
+    BitmapFont scoreFont;
     Snake snake;
     Instant timeStarted;
     Instant prevSnakeUpdate;
@@ -42,6 +43,9 @@ public class MyGdxGame extends ApplicationAdapter {
     Sound eatSound;
     Sound burpSound;
     Sound gameOverSound;
+
+    int nFeedings = 0;
+    int nLength = 0;
 
     public static final int TILESIZE = 32;
 
@@ -59,8 +63,11 @@ public class MyGdxGame extends ApplicationAdapter {
         System.out.println("---------------->>>>>>>>>>>>>>>>> " + Gdx.graphics.getWidth() + ", " + Gdx.graphics.getHeight());
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        camera.zoom = -2f;
+        camera.zoom = 2f;
         camera.update();
+
+
+
 
         batch = new SpriteBatch();
         /*		img = new Texture("badlogic.jpg");*/
@@ -69,20 +76,33 @@ public class MyGdxGame extends ApplicationAdapter {
         eatSound = Gdx.audio.newSound(Gdx.files.internal("sound/apple-crunch.wav"));
         gameOverSound = Gdx.audio.newSound(Gdx.files.internal("sound/fart2.wav"));
         burpSound = Gdx.audio.newSound(Gdx.files.internal("sound/burp1.wav"));
+
+        inputHandler = new InputHandler(camera, snake);
+
+        Gdx.input.setInputProcessor(inputHandler);
+
         newGame();
+
     }
 
     private void newGame() {
+        nFeedings = 0;
         GAME_OVER = false;
         map = new Map("maps/map1.map");
 
         basicScreen = new BasicScreen(map, camera, batch, tileWhite);
 
-        font = new BitmapFont(Gdx.files.internal("fonts/square-deal.fnt"), true);
-        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        font.setColor(Color.RED);
-        font.getData().setScale(-1,1);
-        font.getData().markupEnabled = true;
+        gameOverFont = new BitmapFont(Gdx.files.internal("fonts/square-deal.fnt"), false);
+        gameOverFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        gameOverFont.setColor(Color.RED);
+        gameOverFont.getData().setScale(1,1);
+        gameOverFont.getData().markupEnabled = true;
+
+        scoreFont = new BitmapFont(Gdx.files.internal("fonts/square-deal.fnt"), false);
+        scoreFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        scoreFont.setColor(Color.WHITE);
+        scoreFont.getData().setScale(1,1);
+        scoreFont.getData().markupEnabled = true;
 
         snake = new Snake(new Vector2(TILESIZE * 16, TILESIZE * 16));
         timeStarted = Instant.now();
@@ -90,13 +110,22 @@ public class MyGdxGame extends ApplicationAdapter {
 
         food = new Food();
         map.placeFood(food, snake);
+
+        nLength = snake.getBody().size();
+
+        inputHandler.setSnake(snake);
+
     }
 
     @Override
     public void render() {
+
+
+        camera.update();
+
         if (GAME_OVER) {
             batch.begin();
-            font.draw(batch, "GAME OVER", TILESIZE * 24, TILESIZE * 16);
+            gameOverFont.draw(batch, "GAME OVER", TILESIZE * 8, TILESIZE * 16);
             batch.end();
             if (Gdx.input.isKeyPressed(Input.Keys.ENTER)) {
                 newGame();
@@ -107,7 +136,12 @@ public class MyGdxGame extends ApplicationAdapter {
             Gdx.gl.glClearColor(Color.BLACK.r, Color.BLACK.g, Color.BLACK.b, 1);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+
             batch.setProjectionMatrix(camera.combined);
+
+            batch.begin();
+            scoreFont.draw(batch, ""+nFeedings, TILESIZE * 30, TILESIZE * 35);
+            batch.end();
 
             batch.begin();
             if (snake.collide(map.getObstacles())) {
@@ -117,9 +151,10 @@ public class MyGdxGame extends ApplicationAdapter {
             }
 
             if (snake.eat(food)) {
+                nFeedings++;
                 lastAte = Instant.now();
                 eatSound.play();
-                if (rnd.nextFloat() <= 0.33f) {
+                if (rnd.nextFloat() <= 0.20f) {
                     shouldBurp = true;
                     hasBurped = false;
                 }
@@ -166,7 +201,7 @@ public class MyGdxGame extends ApplicationAdapter {
             batch.end();
 
         }
-        InputHandler.handleInput();
+/*        inputHandler.handleInput();*/
 
     }
 
