@@ -1,11 +1,25 @@
 package com.stk.nns;
 
-import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
+import com.stk.nns.food.Food;
+import com.stk.nns.input.InputHandler;
+import com.stk.nns.map.Map;
+import com.stk.nns.snake.Snake;
 
-public class MyGdxGame extends ApplicationAdapter {
-    public static final int TILESIZE = 32;
+import java.time.Instant;
+import java.util.Random;
 
-/*    SpriteBatch batch;
+public class Board {
+    SpriteBatch batch;
     Texture tileWall;
     Texture tileHead;
     Texture tileFood;
@@ -27,8 +41,7 @@ public class MyGdxGame extends ApplicationAdapter {
     Sound burpSound;
     Sound gameOverSound;
 
-    int nFeedings = 0;
-    int nLength = 0;
+
 
     public static final int TILESIZE = 32;
 
@@ -37,17 +50,16 @@ public class MyGdxGame extends ApplicationAdapter {
     Random rnd = new Random();
 
     boolean hasBurped = false;
-    boolean shouldBurp = false;*/
+    boolean shouldBurp = false;
 
-    Board board;
     PlaySound playSound;
-    @Override
+
+    public Board(PlaySound playSound) {
+        this.playSound = playSound;
+    }
+
     public void create() {
-        playSound = new PlaySound();
-        board = new Board(playSound);
-        board.create();
-/*        board.create();*/
-/*        WIDTH = Gdx.graphics.getWidth();
+        WIDTH = Gdx.graphics.getWidth();
         HEIGHT = Gdx.graphics.getHeight();
         map = new Map("maps/map1.map");
 
@@ -57,13 +69,11 @@ public class MyGdxGame extends ApplicationAdapter {
         camera.update();
 
         batch = new SpriteBatch();
-        *//*		img = new Texture("badlogic.jpg");*//*
+        /*		img = new Texture("badlogic.jpg");*/
         tileWall = new Texture("tile_wall.png");
         tileHead = new Texture("tile_head_up.png");
         tileFood = new Texture("tile_food.png");
-        eatSound = Gdx.audio.newSound(Gdx.files.internal("sound/apple-crunch.wav"));
-        gameOverSound = Gdx.audio.newSound(Gdx.files.internal("sound/fart2.wav"));
-        burpSound = Gdx.audio.newSound(Gdx.files.internal("sound/burp1.wav"));
+
 
         inputHandler = new InputHandler(camera, snake);
 
@@ -74,16 +84,16 @@ public class MyGdxGame extends ApplicationAdapter {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        newGame();*/
+        newGame();
 
     }
 
-/*    private void newGame() {
-        nFeedings = 0;
+    private void newGame() {
+
         GAME_OVER = false;
 
 
-        *//*        basicScreen = new BasicScreen(map, camera, batch, tileWall);*//*
+/*        basicScreen = new BasicScreen(map, camera, batch, tileWall);*/
 
         gameOverFont = new BitmapFont(Gdx.files.internal("fonts/square-deal.fnt"), false);
         gameOverFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
@@ -97,14 +107,12 @@ public class MyGdxGame extends ApplicationAdapter {
         scoreFont.getData().setScale(1, 1);
         scoreFont.getData().markupEnabled = true;
 
-        snake = new Snake(new Vector2(TILESIZE * 16, TILESIZE * 16), map.getObstacles());
+        snake = new Snake(new Vector2(TILESIZE * 16, TILESIZE * 16), map.getObstacles(), playSound);
         timeStarted = Instant.now();
         prevSnakeUpdate = timeStarted;
 
         food = new Food();
         map.placeFood(food, snake);
-
-        nLength = snake.getBody().size();
 
         inputHandler.setSnake(snake);
 
@@ -113,37 +121,23 @@ public class MyGdxGame extends ApplicationAdapter {
     private void update() {
         if (!GAME_OVER) {
             if (snake.eat(food)) {
-                nFeedings++;
-                lastAte = Instant.now();
-                eatSound.play();
-                if (rnd.nextFloat() <= 0.20f) {
-                    shouldBurp = true;
-                    hasBurped = false;
-                }
                 map.placeFood(food, snake);
             }
 
             if (Instant.now().toEpochMilli() - prevSnakeUpdate.toEpochMilli() > 80) {
-                if (shouldBurp && !hasBurped && Instant.now().toEpochMilli() - lastAte.toEpochMilli() > 800) {
-                    burpSound.play();
-                    shouldBurp = false;
-                    hasBurped = false;
 
-                }
                 if (!snake.move()) {
                     GAME_OVER = true;
-                    gameOverSound.play();
+                    playSound.gameOver();
                 }
                 prevSnakeUpdate = Instant.now();
             }
         }
 
-    }*/
+    }
 
-    @Override
     public void render() {
-        board.render();
-/*        camera.update();
+        camera.update();
         update();
 
         if (GAME_OVER) {
@@ -162,7 +156,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
             // Draw score
             batch.begin();
-            scoreFont.draw(batch, "" + nFeedings, TILESIZE * 30, TILESIZE * 35);
+            scoreFont.draw(batch, "" + snake.getnFeedings(), TILESIZE * 30, TILESIZE * 35);
             batch.end();
 
             batch.begin();
@@ -178,16 +172,12 @@ public class MyGdxGame extends ApplicationAdapter {
 
             batch.end();
 
-        }*/
+        }
 
     }
 
-    @Override
     public void dispose() {
-        board.dispose();
-/*        batch.dispose();
+        batch.dispose();
         tileWall.dispose();
-        tileHead.dispose();
-        tileFood.dispose();*/
     }
 }

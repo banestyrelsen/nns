@@ -1,14 +1,17 @@
 package com.stk.nns.snake;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.MyGdxGame;
+import com.stk.nns.PlaySound;
 import com.stk.nns.food.Food;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 public class Snake {
 
@@ -21,14 +24,21 @@ public class Snake {
     private int startingLength = 2;
     private int lastMove = Input.Keys.UP;
     private int nextMove = Input.Keys.UP;
+    int nFeedings = 0;
+    Instant lastAte = Instant.now();
+    boolean shouldBurp = false;
 
-    public Snake(Vector2 startPos, List<Vector2> obstaclePositions) {
+    PlaySound playSound;
+
+    public Snake(Vector2 startPos, List<Vector2> obstaclePositions, PlaySound playSound) {
         body = new LinkedList<>();
         body.add(new Vector2(startPos.x, startPos.y));
         for (int i = 1; i < startingLength; i++) {
             body.add(new Vector2(startPos.x, startPos.y + i));
         }
         this.obstaclePositions = obstaclePositions;
+        this.playSound = playSound;
+
     }
 
     public void setNextMove(int nextMove) {
@@ -58,7 +68,21 @@ public class Snake {
         return "?";
     }
 
+    private void update() {
+        if (shouldBurp && Instant.now().toEpochMilli() - lastAte.toEpochMilli() > 800) {
+            playSound.burp();
+            shouldBurp = false;
+
+        }
+    }
+
+    /**
+     * Returns false if there is a collision
+     * @return
+     */
     public boolean move() {
+        update();
+
         // If next move is last move in reverse, repeat last move
         int move = isMoveLegal(nextMove) ? nextMove : lastMove;
 
@@ -89,42 +113,10 @@ public class Snake {
         body.addFirst(newHead);
         body.removeLast();
 
-/*        // Drag tail
-        for (int i = body.size() - 1; i > 0; i--) {
-            Vector2 segment = body.get(i);
-            Vector2 earlierSegment = body.get(i - 1);
-            segment.x = earlierSegment.x;
-            segment.y = earlierSegment.y;
-        }*/
-
         lastMove = move;
 
         return true;
 
-/*        System.out.println("MOVING " + directionString(direction) + " --->>> " + directionString(newDirection));
-
-        System.out.println("direction " + (direction == newDirection));
-
-
-*//*        if (    // Ignore orders to reverse direction
-                !(newDirection.x == -direction.x && newDirection.y == 0)
-                && !(newDirection.y == -direction.y && newDirection.x == 0)) {
-            direction = newDirection;
-        } else {
-            System.out.println("OOOOOOOOPS!");
-        }*//*
-*//*        if (!body.stream().anyMatch(segment ->
-            segment != body.get(0)
-                    && segment.x == body.get(0).x + newDirection.x * MyGdxGame.TILESIZE
-                    && segment.y == body.get(0).y + newDirection.x * MyGdxGame.TILESIZE
-        )) *//*
-        if (
-                body.get(1).x == body.get(0).x + newDirection.x * MyGdxGame.TILESIZE
-                        && body.get(1).y == body.get(0).y + newDirection.x * MyGdxGame.TILESIZE
-        ) {
-*//*                direction.x = newDirection.x;
-                direction.y = newDirection.y;*//*
-        }*/
     }
 
     private boolean isMoveLegal(int move) {
@@ -157,12 +149,39 @@ public class Snake {
 
     public boolean eat(Food food) {
         if (food.getPosition().equals(body.get(0))) {
-            Vector2 lastSegment = body.get(body.size() - 1);
-            body.add(new Vector2(lastSegment.x, lastSegment.y));
+            grow();
+            nFeedings++;
+            lastAte = Instant.now();
+            playSound.eat();
+            if (nFeedings == 0) {
+                shouldBurp = false;
+            } else if (nFeedings % 5 == 0) {
+                shouldBurp = true;
+            }
             return true;
         }
         return false;
     }
 
+    private void grow() {
+        Vector2 lastSegment = body.get(body.size() - 1);
+        body.add(new Vector2(lastSegment.x, lastSegment.y));
 
+    }
+
+    public void render(SpriteBatch batch, Texture tileWall, Texture tileHead) {
+        for (int i = 0; i < body.size(); i++) {
+            Vector2 segment = body.get(i);
+            if (i == 0) {
+                batch.draw(tileHead, segment.x, segment.y);
+            } else {
+                batch.draw(tileWall, segment.x, segment.y);
+            }
+
+        }
+    }
+
+    public int getnFeedings() {
+        return nFeedings;
+    }
 }

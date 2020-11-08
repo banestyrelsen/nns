@@ -1,5 +1,7 @@
 package com.stk.nns.map;
 
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.MyGdxGame;
 import com.stk.nns.food.Food;
@@ -45,9 +47,11 @@ public class Map {
 
         for (int y = 0; y < lines.size(); y++) {
             String line = lines.get(y);
+            System.out.println(line);
             for (int x = 0; x < line.length(); x++) {
                 tile[x][y] = new Tile(Integer.parseInt(String.valueOf(line.charAt(x))), new Vector2(x * MyGdxGame.TILESIZE, y * MyGdxGame.TILESIZE));
                 if (tile[x][y].getValue() == 1) {
+                    System.out.println("obstacle at: " + x + "," + y);
                     obstacles.add(tile[x][y].getPosition());
                 } else {
                     emptyPositions.add(tile[x][y].getPosition());
@@ -56,6 +60,17 @@ public class Map {
         }
 
         System.out.println("Done");
+    }
+
+    public void render(SpriteBatch batch, Texture tileWall) {
+        Vector2 size = getSize();
+        for (int x = 0; x < size.x; x++) {
+            for (int y = 0; y < size.y; y++) {
+                if (tile[x][y].getValue() == 1) {
+                    batch.draw(tileWall, tile[x][y].getPosition().x, tile[x][y].getPosition().y);
+                }
+            }
+        }
     }
 
     public void placeFood(Food food, Snake snake) {
