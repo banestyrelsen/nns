@@ -63,13 +63,11 @@ public class Map {
         Vector2 candidate = null;
         while (!positionFound) {
             candidate = emptyPositions.get(rnd.nextInt(emptyPositions.size()));
-            for (Vector2 segment : snake.getBody()) {
-                if (segment.equals(candidate)) {
 
-                    break;
-                }
+            Vector2 finalCandidate = candidate;
+            if (!snake.getBody().stream().anyMatch(segment -> segment.x == finalCandidate.x && segment.y == finalCandidate.y)) {
+                positionFound = true;
             }
-            positionFound = true;
         }
         food.setPosition(new Vector2(candidate.x, candidate.y));
     }

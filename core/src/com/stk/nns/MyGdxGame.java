@@ -23,8 +23,9 @@ import java.util.Random;
 
 public class MyGdxGame extends ApplicationAdapter {
     SpriteBatch batch;
-    Texture tileWhite;
-    Texture tileGreen;
+    Texture tileWall;
+    Texture tileHead;
+    Texture tileFood;
     Map map;
     Food food;
     BasicScreen basicScreen;
@@ -67,12 +68,11 @@ public class MyGdxGame extends ApplicationAdapter {
         camera.update();
 
 
-
-
         batch = new SpriteBatch();
         /*		img = new Texture("badlogic.jpg");*/
-        tileWhite = new Texture("tile_white.png");
-        tileGreen= new Texture("tile_green.png");
+        tileWall = new Texture("tile_wall.png");
+        tileHead = new Texture("tile_head_up.png");
+        tileFood = new Texture("tile_food.png");
         eatSound = Gdx.audio.newSound(Gdx.files.internal("sound/apple-crunch.wav"));
         gameOverSound = Gdx.audio.newSound(Gdx.files.internal("sound/fart2.wav"));
         burpSound = Gdx.audio.newSound(Gdx.files.internal("sound/burp1.wav"));
@@ -81,6 +81,11 @@ public class MyGdxGame extends ApplicationAdapter {
 
         Gdx.input.setInputProcessor(inputHandler);
 
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         newGame();
 
     }
@@ -90,21 +95,21 @@ public class MyGdxGame extends ApplicationAdapter {
         GAME_OVER = false;
         map = new Map("maps/map1.map");
 
-        basicScreen = new BasicScreen(map, camera, batch, tileWhite);
+        basicScreen = new BasicScreen(map, camera, batch, tileWall);
 
         gameOverFont = new BitmapFont(Gdx.files.internal("fonts/square-deal.fnt"), false);
         gameOverFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         gameOverFont.setColor(Color.RED);
-        gameOverFont.getData().setScale(1,1);
+        gameOverFont.getData().setScale(1, 1);
         gameOverFont.getData().markupEnabled = true;
 
         scoreFont = new BitmapFont(Gdx.files.internal("fonts/square-deal.fnt"), false);
         scoreFont.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         scoreFont.setColor(Color.WHITE);
-        scoreFont.getData().setScale(1,1);
+        scoreFont.getData().setScale(1, 1);
         scoreFont.getData().markupEnabled = true;
 
-        snake = new Snake(new Vector2(TILESIZE * 16, TILESIZE * 16));
+        snake = new Snake(new Vector2(TILESIZE * 16, TILESIZE * 16), map.getObstacles());
         timeStarted = Instant.now();
         prevSnakeUpdate = timeStarted;
 
@@ -117,39 +122,8 @@ public class MyGdxGame extends ApplicationAdapter {
 
     }
 
-    @Override
-    public void render() {
-
-
-        camera.update();
-
-        if (GAME_OVER) {
-            batch.begin();
-            gameOverFont.draw(batch, "GAME OVER", TILESIZE * 8, TILESIZE * 16);
-            batch.end();
-            if (Gdx.input.isKeyPressed(Input.Keys.ENTER)) {
-                newGame();
-            }
-
-        } else {
-
-            Gdx.gl.glClearColor(Color.BLACK.r, Color.BLACK.g, Color.BLACK.b, 1);
-            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-
-            batch.setProjectionMatrix(camera.combined);
-
-            batch.begin();
-            scoreFont.draw(batch, ""+nFeedings, TILESIZE * 30, TILESIZE * 35);
-            batch.end();
-
-            batch.begin();
-            if (snake.collide(map.getObstacles())) {
-                GAME_OVER = true;
-                gameOverSound.play();
-                /*			Gdx.app.exit();*/
-            }
-
+    private void update() {
+        if (!GAME_OVER) {
             if (snake.eat(food)) {
                 nFeedings++;
                 lastAte = Instant.now();
@@ -162,52 +136,92 @@ public class MyGdxGame extends ApplicationAdapter {
             }
 
             if (Instant.now().toEpochMilli() - prevSnakeUpdate.toEpochMilli() > 80) {
-                if (shouldBurp && !hasBurped && Instant.now().toEpochMilli() - lastAte.toEpochMilli() > 800 ) {
+                if (shouldBurp && !hasBurped && Instant.now().toEpochMilli() - lastAte.toEpochMilli() > 800) {
                     burpSound.play();
                     shouldBurp = false;
                     hasBurped = false;
 
                 }
-                snake.update();
+                if (!snake.move()) {
+                    GAME_OVER = true;
+                    gameOverSound.play();
+                }
                 prevSnakeUpdate = Instant.now();
             }
+        }
 
+    }
 
-            /*		basicScreen.render(1f);*/
+    @Override
+    public void render() {
+        camera.update();
+        update();
 
+        if (GAME_OVER) {
+            batch.begin();
+            gameOverFont.draw(batch, "GAME OVER", TILESIZE * 8, TILESIZE * 16);
+            batch.end();
+            if (Gdx.input.isKeyPressed(Input.Keys.ENTER)) {
+                newGame();
+            }
+
+        } else {
+            Gdx.gl.glClearColor(Color.BLACK.r, Color.BLACK.g, Color.BLACK.b, 1);
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+            batch.setProjectionMatrix(camera.combined);
+
+            // Draw score
+            batch.begin();
+            scoreFont.draw(batch, "" + nFeedings, TILESIZE * 30, TILESIZE * 35);
+            batch.end();
+
+            batch.begin();
 
             Tile[][] tile = map.getTile();
             Vector2 size = map.getSize();
 
-            batch.setProjectionMatrix(camera.combined);
-            /*		batch.begin();*/
 
-
+            // Draw wall
             for (int x = 0; x < size.x; x++) {
-
                 for (int y = 0; y < size.y; y++) {
                     if (tile[x][y].getValue() == 1) {
-                        batch.draw(tileWhite, tile[x][y].getPosition().x, tile[x][y].getPosition().y);
+                        batch.draw(tileWall, tile[x][y].getPosition().x, tile[x][y].getPosition().y);
                     }
                 }
             }
 
-            batch.draw(tileGreen, food.getPosition().x, food.getPosition().y);
+            // Draw food
+            batch.draw(tileFood, food.getPosition().x, food.getPosition().y);
 
-            for (Vector2 segment : snake.getBody()) {
-                batch.draw(tileWhite, segment.x, segment.y);
-            }
+            drawSnake();
+
+/*            for (Vector2 segment : snake.getBody()) {
+                batch.draw(tileWall, segment.x, segment.y);
+            }*/
 
             batch.end();
 
         }
-/*        inputHandler.handleInput();*/
+        /*        inputHandler.handleInput();*/
 
+    }
+
+    private void drawSnake() {
+        // Draw snake
+        for (int i = 0; i < snake.getBody().size(); i++) {
+            Vector2 segment = snake.getBody().get(i);
+            if (i == 0) {
+                batch.draw(tileHead, segment.x, segment.y);
+            } else {
+                batch.draw(tileWall, segment.x, segment.y);
+            }
+
+        }
     }
 
     @Override
     public void dispose() {
         batch.dispose();
-        tileWhite.dispose();
+        tileWall.dispose();
     }
 }

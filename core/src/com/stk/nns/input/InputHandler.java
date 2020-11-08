@@ -25,41 +25,38 @@ public class InputHandler implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        System.out.println("HERE");
-
         if (keycode == Input.Keys.ESCAPE) {
             Gdx.app.exit();
         }
 
-        direction = snake.getDirection();
-        if (keycode == Input.Keys.LEFT) {
-                        System.out.println("LEFT");
-            if (direction.x != 1 && direction.y != 0) {
-                direction.x = -1;
+
+
+        if (keycode == Input.Keys.LEFT ||
+                keycode ==  Input.Keys.RIGHT ||
+                keycode ==  Input.Keys.UP ||
+                keycode ==  Input.Keys.DOWN ) {
+            snake.setNextMove(keycode);
+            return true;
+        }
+/*                direction.x = -1;
                 direction.y = 0;
-            }
+            snake.setNewDirection(direction);
         } else if (keycode ==  Input.Keys.RIGHT) {
-            System.out.println("RIGHT");
-            if (direction.x != -1 && direction.y != 0) {
                 direction.x = 1;
                 direction.y = 0;
-            }
+            snake.setNewDirection(direction);
         } else if (keycode ==  Input.Keys.UP) {
-                        System.out.println("UP");
-            if (direction.x != 0 && direction.y != -1) {
                 direction.x = 0;
                 direction.y = 1;
-            }
+            snake.setNewDirection(direction);
         } else if (keycode ==  Input.Keys.DOWN) {
-                        System.out.println("DOWN");
-            if (direction.x != 0 && direction.y != 1) {
                 direction.x = 0;
                 direction.y = -1;
-            }
-        }
-        snake.setDirection(direction);
+            snake.setNewDirection(direction);
+        }*/
 
-        return false;
+
+        return true;
     }
 
     @Override
