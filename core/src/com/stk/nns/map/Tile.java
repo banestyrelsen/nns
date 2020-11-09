@@ -4,17 +4,21 @@ import com.badlogic.gdx.math.Vector2;
 
 public class Tile {
 
-    private int value;
-    private Vector2 position;
+    private float value;
+    private final Vector2 position;
 
 
-    public Tile(int value, Vector2 pos) {
+    public Tile(float value, Vector2 pos) {
         this.value = value;
         this.position = pos;
     }
 
-    public int getValue() {
+    public float getValue() {
         return value;
+    }
+
+    public void setValue(float value) {
+        this.value = value;
     }
 
     public Vector2 getPosition() {

@@ -9,10 +9,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
-import com.stk.nns.food.Food;
 import com.stk.nns.input.BoardInputProcessor;
-import com.stk.nns.map.Map;
+import com.stk.nns.map.Level;
 import com.stk.nns.snake.Snake;
 
 import java.time.Instant;
@@ -22,8 +20,7 @@ public class Board {
     Texture tileWall;
     Texture tileHead;
     Texture tileFood;
-    Map map;
-    Food food;
+    Level level;
     private OrthographicCamera camera;
     BoardInputProcessor boardInputProcessor;
 
@@ -54,7 +51,7 @@ public class Board {
         this.mainFontRed = mainFontRed;
         WIDTH = Gdx.graphics.getWidth();
         HEIGHT = Gdx.graphics.getHeight();
-        map = new Map("maps/map1.map");
+
 
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -86,12 +83,13 @@ public class Board {
 
     private void newGame() {
         GAME_OVER = false;
-        snake = new Snake(new Vector2(TILESIZE * 16, TILESIZE * 8), map.getObstacles(), playSound);
+        level = new Level("maps/map1.map");
+        snake = new Snake(new Vector2(480f, 576), level, playSound);
         timeStarted = Instant.now();
         prevSnakeUpdate = timeStarted;
 
-        food = new Food();
-        map.placeFood(food, snake);
+
+        level.placeFood();
 
         boardInputProcessor.setSnake(snake);
 
@@ -99,8 +97,8 @@ public class Board {
 
     private void update() {
         if (!GAME_OVER) {
-            if (snake.eat(food)) {
-                map.placeFood(food, snake);
+            if (snake.eat()) {
+                level.placeFood();
             }
 
             if (Instant.now().toEpochMilli() - prevSnakeUpdate.toEpochMilli() > 80) {
@@ -111,6 +109,11 @@ public class Board {
                 }
                 prevSnakeUpdate = Instant.now();
             }
+
+
+
+/*            System.out.println("snake.getBody(): " + snake.getBody());
+            System.out.println("level.getSnakePositions(): " + level.getSnakePositions());*/
         }
 
     }
@@ -141,11 +144,8 @@ public class Board {
 
             batch.begin();
 
-            // Draw map
-            map.render(batch, tileWall);
-
-            // Draw food
-            batch.draw(tileFood, food.getPosition().x, food.getPosition().y);
+            // Draw level
+            level.render(batch, tileWall, tileFood);
 
             // Draw snake
             snake.render(batch, tileWall, tileHead);

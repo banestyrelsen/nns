@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.Main;
 import com.stk.nns.PlaySound;
-import com.stk.nns.food.Food;
+import com.stk.nns.map.Level;
 
 import java.time.Instant;
 import java.util.LinkedList;
@@ -17,7 +17,6 @@ public class Snake {
     LinkedList<Vector2> body;
 
     Vector2 direction;
-    List<Vector2> obstaclePositions;
 
     private final int startingLength = 2;
     private int lastMove = Input.Keys.UP;
@@ -28,13 +27,15 @@ public class Snake {
 
     PlaySound playSound;
 
-    public Snake(Vector2 startPos, List<Vector2> obstaclePositions, PlaySound playSound) {
+    Level level;
+
+    public Snake(Vector2 startPos, Level level, PlaySound playSound) {
         body = new LinkedList<>();
         body.add(new Vector2(startPos.x, startPos.y));
         for (int i = 1; i < startingLength; i++) {
-            body.add(new Vector2(startPos.x, startPos.y + i));
+            body.add(new Vector2(startPos.x, startPos.y - Main.TILESIZE));
         }
-        this.obstaclePositions = obstaclePositions;
+        this.level = level;
         this.playSound = playSound;
         this.direction = new Vector2(0, -1);
     }
@@ -86,10 +87,11 @@ public class Snake {
 
         // Drag tail
         body.addFirst(newHead);
-        body.removeLast();
+        Vector2 removedSegment = body.removeLast();
+        level.updateSnakePosition(newHead, removedSegment);
+
 
         lastMove = move;
-
         return true;
 
     }
@@ -114,16 +116,12 @@ public class Snake {
             }
         }
 
-        for (Vector2 obstaclePosition : obstaclePositions) {
-            if (head.equals(obstaclePosition)) {
-                return true;
-            }
-        }
-        return false;
+        return level.collide(head);
+
     }
 
-    public boolean eat(Food food) {
-        if (food.getPosition().equals(body.get(0))) {
+    public boolean eat() {
+        if (level.getFoodPosition().equals(body.get(0))) {
             grow();
             nFeedings++;
             lastAte = Instant.now();
