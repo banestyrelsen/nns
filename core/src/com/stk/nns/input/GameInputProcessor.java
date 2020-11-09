@@ -5,18 +5,20 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
+import com.stk.nns.Game;
 import com.stk.nns.snake.Snake;
 
-public class BoardInputProcessor implements InputProcessor {
+public class GameInputProcessor implements InputProcessor {
 
 
     private Snake snake;
     private OrthographicCamera camera;
-    private Vector2 direction = new Vector2(0,1);
+    private Game gameObject;
 
-    public BoardInputProcessor(OrthographicCamera camera, Snake snake) {
+    public GameInputProcessor(OrthographicCamera camera, Snake snake, Game gameObject) {
         this.camera = camera;
         this.snake = snake;
+        this.gameObject = gameObject;
     }
 
     public void setSnake(Snake snake) {
@@ -37,7 +39,14 @@ public class BoardInputProcessor implements InputProcessor {
             return true;
         }
 
-
+        if (keycode == Input.Keys.MINUS) {
+            gameObject.changeSnakeUpdateInterval(1);
+            return true;
+        }
+        if (keycode == Input.Keys.PLUS) {
+            gameObject.changeSnakeUpdateInterval(-1);
+            return true;
+        }
         return true;
     }
 

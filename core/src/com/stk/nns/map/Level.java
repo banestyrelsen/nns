@@ -16,8 +16,6 @@ import java.util.stream.Collectors;
 
 public class Level {
 
-/*    private Tile[][] tile;*/
-
     private final float SOLID = 1.0f;
     private final float SNAKE = 0.5f;
     private final float EMPTY = 0.25f;
@@ -38,28 +36,12 @@ public class Level {
 
     public Level(String fileName) {
         tiles = new HashMap<>();
-        File file = new File(fileName);    //creates a new file instance
-        List<String> lines = new ArrayList<>();
-        try {
 
-            FileReader fr = new FileReader(file);   //reads the file
-            BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
-            StringBuffer sb = new StringBuffer();    //constructs a string buffer with no characters
-            String line;
-            while ((line = br.readLine()) != null) {
-                lines.add(line);
-            }
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        List<String> lines = readFile(fileName);
 
         HEIGHT = lines.size();
         WIDTH = lines.get(0).length();
 
-/*        tile = new Tile[lines.get(0).length()][lines.size()];*/
 
         StringBuilder sb = new StringBuilder();
         for (int y = 0; y < lines.size(); y++) {
@@ -88,32 +70,35 @@ public class Level {
 
 /*        for (Entry<TileIndex, Tile> entry : tiles.entrySet()) {
             Tile tile = entry.getValue();
-            System.out.print(tile.getValue() + " ");
-            if (tile.getPosition().x == WIDTH * Main.TILESIZE) {
-                System.out.println("\n");
-            }
-        }*/
-
-        for (Entry<TileIndex, Tile> entry : tiles.entrySet()) {
-            Tile tile = entry.getValue();
             System.out.print(tile.getPosition().x + ","+ tile.getPosition().y + " ") ;
             if (tile.getPosition().x == 1024) {
                 System.out.println("\n");
             }
-        }
-
-
-/*        for (int y = 0; y < tiles.length; y++) {
-            for (int x = 0; x < tiles.length; x++) {
-                System.out.print(tiles[x][y].getValue());
-            }
-            System.out.print("\n");
         }*/
     }
 
-    public void render(SpriteBatch batch, Texture tileWall, Texture foodTile) {
+    private List<String> readFile(String fileName) {
+        List<String> lines = new ArrayList<>();
+        File file = new File(fileName);    //creates a new file instance
+        try {
 
-        Vector2 size = getSize();
+            FileReader fr = new FileReader(file);   //reads the file
+            BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
+            StringBuffer sb = new StringBuffer();    //constructs a string buffer with no characters
+            String line;
+            while ((line = br.readLine()) != null) {
+                lines.add(line);
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return lines;
+    }
+
+    public void render(SpriteBatch batch, Texture tileWall, Texture foodTile) {
 
         for (Entry<TileIndex, Tile> entry : tiles.entrySet()) {
             Tile tile = entry.getValue();
@@ -123,22 +108,6 @@ public class Level {
                 batch.draw(foodTile, tile.getPosition().x, tile.getPosition().y);
             }
         }
-
-/*        for (int y = 0; y < tiles.length; y++) {
-            for (int x = 0; x < tiles.length; x++) {
-                if (tiles[x][y].getValue() == 1) {
-                    batch.draw(tileWall, tiles[x][y].getPosition().x, tiles[x][y].getPosition().y);
-                }
-            }
-        }*/
-/*
-        for (int x = 0; x < size.x; x++) {
-            for (int y = 0; y < size.y; y++) {
-                if (tile[x][y].getValue() == 1) {
-                    batch.draw(tileWall, tile[x][y].getPosition().x, tile[x][y].getPosition().y);
-                }
-            }
-        }*/
     }
 
     public void placeFood() {
@@ -153,13 +122,6 @@ public class Level {
                 tile.setValue(FOOD);
                 foodPosition = candidate;
             }
-/*            Vector2 finalCandidate = candidate;
-
-            Tile tile =
-
-            if (!snake.getBody().stream().anyMatch(segment -> segment.x == finalCandidate.x && segment.y == finalCandidate.y)) {
-                positionFound = true;
-            }*/
         }
 
     }

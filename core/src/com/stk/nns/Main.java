@@ -5,20 +5,20 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.stk.nns.input.BoardInputProcessor;
+import com.stk.nns.input.GameInputProcessor;
 import com.stk.nns.input.MenuInputProcessor;
 import com.stk.nns.menu.Menu;
 
 public class Main extends ApplicationAdapter {
     public static final int TILESIZE = 32;
 
-    Board board;
+    Game game;
     PlaySound playSound;
     Menu menu;
     BitmapFont mainFont;
     BitmapFont mainFontRed;
     MenuInputProcessor menuInputProcessor;
-    BoardInputProcessor boardInputProcessor;
+    GameInputProcessor gameInputProcessor;
 
     private Mode mode = Mode.MENU;
     public static Mode newMode = Mode.MENU;
@@ -34,7 +34,7 @@ public class Main extends ApplicationAdapter {
                 case MENU:
                     Gdx.input.setInputProcessor(menuInputProcessor);
                 case PLAY:
-                    Gdx.input.setInputProcessor(board.getBoardInputProcessor());
+                    Gdx.input.setInputProcessor(game.getGameInputProcessor());
             }
         }
     }
@@ -58,8 +58,8 @@ public class Main extends ApplicationAdapter {
         menu = new Menu(playSound, mainFont);
 
 
-        board = new Board(playSound);
-        board.create(mainFont,mainFontRed);
+        game = new Game(playSound);
+        game.create(mainFont,mainFontRed);
 
         menuInputProcessor = new MenuInputProcessor();
         Gdx.input.setInputProcessor(menuInputProcessor);
@@ -82,7 +82,7 @@ public class Main extends ApplicationAdapter {
                 menu.render();
                 break;
             case PLAY:
-                board.render();
+                game.render();
                 break;
             default:
                 break;
@@ -91,7 +91,7 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void dispose() {
-        board.dispose();
+        game.dispose();
     }
 
 }

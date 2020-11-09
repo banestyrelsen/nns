@@ -9,20 +9,21 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
-import com.stk.nns.input.BoardInputProcessor;
+import com.stk.nns.input.GameInputProcessor;
 import com.stk.nns.map.Level;
 import com.stk.nns.snake.Snake;
 
 import java.time.Instant;
+import java.util.Map;
 
-public class Board {
+public class Game {
     SpriteBatch batch;
     Texture tileWall;
     Texture tileHead;
     Texture tileFood;
     Level level;
     private OrthographicCamera camera;
-    BoardInputProcessor boardInputProcessor;
+    GameInputProcessor gameInputProcessor;
 
     public static int WIDTH;
     public static int HEIGHT;
@@ -30,6 +31,10 @@ public class Board {
     Snake snake;
     Instant timeStarted;
     Instant prevSnakeUpdate;
+    Instant prevSpeedUpdate;
+
+    int slowest = 210;
+    int fastest = 10;
 
     public static final int TILESIZE = 32;
 
@@ -38,13 +43,17 @@ public class Board {
     BitmapFont mainFontRed;
     PlaySound playSound;
 
-    public Board(PlaySound playSound) {
+    public Game(PlaySound playSound) {
         this.playSound = playSound;
     }
 
-    public BoardInputProcessor getBoardInputProcessor() {
-        return boardInputProcessor;
+    public GameInputProcessor getGameInputProcessor() {
+        return gameInputProcessor;
     }
+
+    private int snakeUpdateInterval = 80;
+
+
 
     public void create(BitmapFont mainFont, BitmapFont mainFontRed) {
         this.mainFont = mainFont;
@@ -59,18 +68,15 @@ public class Board {
         camera.update();
 
 
-
-
         batch = new SpriteBatch();
-        /*		img = new Texture("badlogic.jpg");*/
         tileWall = new Texture("tile_wall.png");
         tileHead = new Texture("tile_head_up.png");
         tileFood = new Texture("tile_food.png");
 
 
-        boardInputProcessor = new BoardInputProcessor(camera, snake);
+        gameInputProcessor = new GameInputProcessor(camera, snake, this);
 
-        Gdx.input.setInputProcessor(boardInputProcessor);
+        Gdx.input.setInputProcessor(gameInputProcessor);
 
         try {
             Thread.sleep(500);
@@ -87,11 +93,11 @@ public class Board {
         snake = new Snake(new Vector2(480f, 576), level, playSound);
         timeStarted = Instant.now();
         prevSnakeUpdate = timeStarted;
-
+        prevSpeedUpdate = timeStarted;
 
         level.placeFood();
 
-        boardInputProcessor.setSnake(snake);
+        gameInputProcessor.setSnake(snake);
 
     }
 
@@ -101,7 +107,7 @@ public class Board {
                 level.placeFood();
             }
 
-            if (Instant.now().toEpochMilli() - prevSnakeUpdate.toEpochMilli() > 80) {
+            if (Instant.now().toEpochMilli() - prevSnakeUpdate.toEpochMilli() > snakeUpdateInterval) {
 
                 if (!snake.move()) {
                     GAME_OVER = true;
@@ -110,10 +116,6 @@ public class Board {
                 prevSnakeUpdate = Instant.now();
             }
 
-
-
-/*            System.out.println("snake.getBody(): " + snake.getBody());
-            System.out.println("level.getSnakePositions(): " + level.getSnakePositions());*/
         }
 
     }
@@ -121,43 +123,67 @@ public class Board {
     public void render() {
         camera.update();
         update();
+        Gdx.gl.glClearColor(Color.BLACK.r, Color.BLACK.g, Color.BLACK.b, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        batch.setProjectionMatrix(camera.combined);
 
-        if (GAME_OVER) {
-            // Draw game over screen
-            batch.begin();
-            mainFontRed.draw(batch, "GAME OVER", TILESIZE * 8, TILESIZE * 16);
-            batch.end();
-            if (Gdx.input.isKeyPressed(Input.Keys.ENTER)) {
-                newGame();
-            }
 
-        } else {
-            Gdx.gl.glClearColor(Color.BLACK.r, Color.BLACK.g, Color.BLACK.b, 1);
-            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-            batch.setProjectionMatrix(camera.combined);
 
             // Draw score
             batch.begin();
+            drawSpeed();
             mainFont.draw(batch, "" + snake.getnFeedings(), TILESIZE * 30, TILESIZE * 37);
-/*            mainFont.draw(batch,  snake.getBody().get(0).x + "," + snake.getBody().get(0).y, TILESIZE * 0, TILESIZE * 35);*/
             batch.end();
 
-            batch.begin();
 
+            batch.begin();
             // Draw level
             level.render(batch, tileWall, tileFood);
 
             // Draw snake
             snake.render(batch, tileWall, tileHead);
-
             batch.end();
 
+        if (GAME_OVER) {
+            // Draw game over screen
+            batch.begin();
+            mainFontRed.draw(batch, "GAME OVER", TILESIZE * 8, TILESIZE * 16);
+
+            batch.end();
+            if (Gdx.input.isKeyPressed(Input.Keys.ENTER)) {
+                newGame();
+            }
+
         }
+
 
     }
 
     public void dispose() {
         batch.dispose();
         tileWall.dispose();
+        tileFood.dispose();
+        mainFont.dispose();
+        mainFontRed.dispose();
+    }
+
+    private void drawSpeed() {
+        mainFont.draw(batch, "" + getSpeed(), TILESIZE * 0, TILESIZE * 37);
+    }
+
+    public void changeSnakeUpdateInterval(int delta) {
+        if (Instant.now().toEpochMilli() - prevSpeedUpdate.toEpochMilli() > 20) {
+            if (!(snakeUpdateInterval + delta <= 10) && snakeUpdateInterval + delta < 200) {
+                snakeUpdateInterval += snakeUpdateInterval > 50 ? delta * 2 : delta * 2;
+            }
+            System.out.println("SPEED: " + snakeUpdateInterval);
+        }
+
+    }
+
+    private int getSpeed() {
+        int range = slowest - fastest;
+        int speed = range - snakeUpdateInterval;
+        return speed / 2;
     }
 }
