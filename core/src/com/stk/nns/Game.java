@@ -14,7 +14,6 @@ import com.stk.nns.map.Level;
 import com.stk.nns.snake.Snake;
 
 import java.time.Instant;
-import java.util.Map;
 
 public class Game {
     SpriteBatch batch;
@@ -33,7 +32,7 @@ public class Game {
     Instant prevSnakeUpdate;
     Instant prevSpeedUpdate;
 
-    int slowest = 210;
+    int slowest = 200;
     int fastest = 10;
 
     public static final int TILESIZE = 32;
@@ -172,7 +171,7 @@ public class Game {
     }
 
     public void changeSnakeUpdateInterval(int delta) {
-        if (Instant.now().toEpochMilli() - prevSpeedUpdate.toEpochMilli() > 20) {
+        if (Instant.now().toEpochMilli() - prevSpeedUpdate.toEpochMilli() > 10) {
             if (!(snakeUpdateInterval + delta <= 10) && snakeUpdateInterval + delta < 200) {
                 snakeUpdateInterval += snakeUpdateInterval > 50 ? delta * 2 : delta * 2;
             }
@@ -182,8 +181,6 @@ public class Game {
     }
 
     private int getSpeed() {
-        int range = slowest - fastest;
-        int speed = range - snakeUpdateInterval;
-        return speed / 2;
+        return ((slowest - (snakeUpdateInterval - fastest)) / 2);
     }
 }
