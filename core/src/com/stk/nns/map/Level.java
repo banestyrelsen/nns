@@ -1,5 +1,6 @@
 package com.stk.nns.map;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -7,10 +8,7 @@ import com.stk.nns.Main;
 import com.stk.nns.snake.Snake;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -78,24 +76,8 @@ public class Level {
     }
 
     private List<String> readFile(String fileName) {
-        List<String> lines = new ArrayList<>();
-        File file = new File(fileName);    //creates a new file instance
-        try {
-
-            FileReader fr = new FileReader(file);   //reads the file
-            BufferedReader br = new BufferedReader(fr);  //creates a buffering character input stream
-            StringBuffer sb = new StringBuffer();    //constructs a string buffer with no characters
-            String line;
-            while ((line = br.readLine()) != null) {
-                lines.add(line);
-            }
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return lines;
+        String mapAsString = Gdx.files.internal(fileName).readString();    //creates a new file instance
+        return Arrays.asList(mapAsString.split(System.lineSeparator()));
     }
 
     public void render(SpriteBatch batch, Texture tileWall, Texture foodTile) {
