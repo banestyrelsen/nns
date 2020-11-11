@@ -157,4 +157,8 @@ public class Snake {
     public int getnFeedings() {
         return nFeedings;
     }
+
+    public Instant getLastAte() {
+        return lastAte;
+    }
 }

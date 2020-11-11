@@ -25,11 +25,11 @@ public class Network {
 
         for (int i = 0; i < NETWORK_SIZE; i++) {
             this.output[i] = new double[NETWORK_LAYER_SIZES[i]];
-            this.bias[i] = new double[NETWORK_LAYER_SIZES[i]];
+            this.bias[i] = NetworkTools.createRandomArray(NETWORK_LAYER_SIZES[i], 0.3, 0.7);
 
             // Create weights array for every layer except the first (input) layer
             if (i > 0) {
-                this.weight[i] = new double[NETWORK_LAYER_SIZES[i]][NETWORK_LAYER_SIZES[i-1]];
+                this.weight[i]  = NetworkTools.createRandomArray(NETWORK_LAYER_SIZES[i],NETWORK_LAYER_SIZES[i-1], -0.3,0.5);
             }
         }
     }

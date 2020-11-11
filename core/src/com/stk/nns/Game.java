@@ -14,6 +14,7 @@ import com.stk.nns.map.Level;
 import com.stk.nns.snake.Snake;
 
 import java.time.Instant;
+import java.util.concurrent.TimeUnit;
 
 public class Game {
     SpriteBatch batch;
@@ -41,6 +42,11 @@ public class Game {
     BitmapFont mainFont;
     BitmapFont mainFontRed;
     PlaySound playSound;
+    String prevDuration;
+    String prevTimeleft;
+
+    long timeUntilStarvation = 10200;
+    long timeLeft = timeUntilStarvation;
 
     public Game(PlaySound playSound) {
         this.playSound = playSound;
@@ -51,7 +57,6 @@ public class Game {
     }
 
     private int snakeUpdateInterval = 80;
-
 
 
     public void create(BitmapFont mainFont, BitmapFont mainFontRed) {
@@ -93,6 +98,12 @@ public class Game {
         prevSnakeUpdate = timeStarted;
         prevSpeedUpdate = timeStarted;
 
+        prevDuration = "";
+        prevTimeleft = "";
+
+        timeUntilStarvation = 10200;
+        timeLeft = timeUntilStarvation;
+
         level.placeFood();
 
         gameInputProcessor.setSnake(snake);
@@ -114,6 +125,9 @@ public class Game {
                 prevSnakeUpdate = Instant.now();
             }
 
+            if (timeLeft <= 1) {
+                GAME_OVER = true;
+            }
         }
 
     }
@@ -126,21 +140,23 @@ public class Game {
         batch.setProjectionMatrix(camera.combined);
 
 
+        // Draw score
+        batch.begin();
+        drawSpeed();
+        mainFont.draw(batch, "" + snake.getnFeedings(), TILESIZE * 30, TILESIZE * 37);
+        mainFont.draw(batch, "" + (GAME_OVER ? prevDuration : getTimeString()), TILESIZE * 0, TILESIZE * -2);
+        drawTimeLeft();
 
-            // Draw score
-            batch.begin();
-            drawSpeed();
-            mainFont.draw(batch, "" + snake.getnFeedings(), TILESIZE * 30, TILESIZE * 37);
-            batch.end();
+        batch.end();
 
 
-            batch.begin();
-            // Draw level
-            level.render(batch, tileWall, tileFood);
+        batch.begin();
+        // Draw level
+        level.render(batch, tileWall, tileFood);
 
-            // Draw snake
-            snake.render(batch, tileWall, tileHead);
-            batch.end();
+        // Draw snake
+        snake.render(batch, tileWall, tileHead);
+        batch.end();
 
         if (GAME_OVER) {
             // Draw game over screen
@@ -181,5 +197,31 @@ public class Game {
 
     private int getSpeed() {
         return ((slowest - (snakeUpdateInterval - fastest)) / 2);
+    }
+
+    private String getTimeString() {
+        long duration = Instant.now().toEpochMilli() - timeStarted.toEpochMilli();
+
+        prevDuration = String.format("%01d.%02d",
+                TimeUnit.MILLISECONDS.toMinutes(duration),
+                TimeUnit.MILLISECONDS.toSeconds(duration) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)));
+        return prevDuration;
+    }
+
+    private String getTimeRemaining() {
+        long sinceAte = Instant.now().toEpochMilli() - snake.getLastAte().toEpochMilli();
+        timeLeft = timeUntilStarvation - sinceAte;
+
+        prevTimeleft = String.format("%d", TimeUnit.MILLISECONDS.toSeconds(timeLeft));
+        return prevTimeleft;
+    }
+
+    private void drawTimeLeft() {
+        BitmapFont font = mainFont;
+        if (timeLeft < 4000) {
+            font = mainFontRed;
+        }
+        font.draw(batch, "" + (GAME_OVER ? prevTimeleft : getTimeRemaining()), TILESIZE * 30, TILESIZE * -2);
     }
 }
