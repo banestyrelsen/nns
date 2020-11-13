@@ -1,6 +1,8 @@
 package com.stk.nns.nn;
 
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.Random;
 
 public class Network {
 
@@ -13,6 +15,9 @@ public class Network {
     private double[][][] weight; // [layer][currentNeuron][connectedNeuronInPreviousLayer]
     private double[][] bias; // [layer][neuron]
 
+    private double[][] error_signal;
+    private double[][] output_derivative;
+
     public Network(int... NETWORK_LAYER_SIZES) {
         this.NETWORK_LAYER_SIZES = NETWORK_LAYER_SIZES;
         this.NETWORK_SIZE = NETWORK_LAYER_SIZES.length;
@@ -22,9 +27,14 @@ public class Network {
         this.output = new double[NETWORK_SIZE][];
         this.weight = new double[NETWORK_SIZE][][];
         this.bias = new double[NETWORK_SIZE][];
+        this.error_signal = new double[NETWORK_SIZE][];
+        this.output_derivative = new double[NETWORK_SIZE][];
 
         for (int i = 0; i < NETWORK_SIZE; i++) {
             this.output[i] = new double[NETWORK_LAYER_SIZES[i]];
+            this.error_signal[i] = new double[NETWORK_LAYER_SIZES[i]];
+            this.output_derivative[i] = new double[NETWORK_LAYER_SIZES[i]];
+
             this.bias[i] = NetworkTools.createRandomArray(NETWORK_LAYER_SIZES[i], 0.3, 0.7);
 
             // Create weights array for every layer except the first (input) layer
@@ -49,6 +59,7 @@ public class Network {
                 }
                 // Apply activation function
                 output[layer][neuron] = sigmoid(sum);
+                output_derivative[layer][neuron] = (output[layer][neuron] * (1 -output[layer][neuron] ));
             }
         }
         return output[NETWORK_SIZE-1];
@@ -58,10 +69,63 @@ public class Network {
         return 1d/ (1 + Math.exp(-x));
     }
 
+    public void train(double[] input, double[] target, double learningRate) {
+        if (input.length != INPUT_SIZE || target.length != OUTPUT_SIZE) {
+            throw new IllegalStateException(String.format("input.length %s != this.INPUT_SIZE %s", input.length, this.INPUT_SIZE));
+        }
+        calculate(input);
+        backpropError(target);
+        updateWeights(learningRate);
+    }
+
+    public void backpropError(double[] target) {
+        for (int neuron = 0; neuron < NETWORK_LAYER_SIZES[NETWORK_SIZE-1]; neuron++) {
+            error_signal[NETWORK_SIZE-1][neuron] = (output[NETWORK_SIZE-1][neuron] - target[neuron])
+                    * output_derivative[NETWORK_SIZE-1][neuron];
+        }
+        for (int layer = NETWORK_SIZE-2; layer > 0; layer--) {
+            for (int neuron = 0; neuron < NETWORK_LAYER_SIZES[layer]; neuron++) {
+                double sum = 0;
+                for (int nextNeuron = 0; nextNeuron < NETWORK_LAYER_SIZES[layer+1]; nextNeuron++) {
+                    sum += weight[layer+1][nextNeuron][neuron] * error_signal[layer+1][nextNeuron];
+                }
+                this.error_signal[layer][neuron] = sum * output_derivative[layer][neuron];
+            }
+        }
+    }
+
+    public void updateWeights(double learningRate) {
+        for (int layer = 1; layer < NETWORK_SIZE; layer++) {
+            for (int neuron = 0; neuron < NETWORK_LAYER_SIZES[layer]; neuron++) {
+                double delta = -learningRate * error_signal[layer][neuron];
+                bias[layer][neuron] += delta;
+                for (int prevNeuron = 0; prevNeuron < NETWORK_LAYER_SIZES[layer-1]; prevNeuron++) {
+                    weight[layer][neuron][prevNeuron] += delta * output[layer-1][prevNeuron];
+                }
+
+            }
+        }
+    }
+
     public static void main(String[] args) {
-        Network net = new Network(4,1,3,4);
-        double[] output = net.calculate(.54,.132,.78,.87);
-        System.out.println(Arrays.toString(output));
+        Network net = new Network(1024,16,16,4);
+
+        double[] input = new double[1024];
+        Random rnd = new Random();
+        for (int i = 0; i < 1024; i++) {
+            input[i] = rnd.nextFloat();
+        }
+
+
+        double[] target = new double[]{0,1,0.5,1};
+        Instant before;
+        for (int i = 0; i < 1000; i++) {
+            net.train(input, target, 0.3);
+        }
+
+        double[] o = net.calculate(input);
+        System.out.println(Arrays.toString(o));
+
     }
 }
 
