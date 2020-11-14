@@ -4,8 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.math.Vector2;
-import com.stk.nns.Game;
+import com.stk.nns.game.Game;
+import com.stk.nns.snake.Control;
 import com.stk.nns.snake.Snake;
 
 public class GameInputProcessor implements InputProcessor {
@@ -31,12 +31,14 @@ public class GameInputProcessor implements InputProcessor {
             Gdx.app.exit();
         }
 
-        if (keycode == Input.Keys.LEFT ||
-                keycode ==  Input.Keys.RIGHT ||
-                keycode ==  Input.Keys.UP ||
-                keycode ==  Input.Keys.DOWN ) {
-            snake.setNextMove(keycode);
-            return true;
+        if (snake.control == Control.PLAYER_CONTROLLED) {
+            if (keycode == Input.Keys.LEFT ||
+                    keycode == Input.Keys.RIGHT ||
+                    keycode == Input.Keys.UP ||
+                    keycode == Input.Keys.DOWN) {
+                snake.setNextMove(keycode);
+                return true;
+            }
         }
 
         if (keycode == Input.Keys.MINUS) {

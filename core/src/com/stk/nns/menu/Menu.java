@@ -2,7 +2,8 @@ package com.stk.nns.menu;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.stk.nns.PlaySound;
+import com.stk.nns.Main;
+import com.stk.nns.sound.PlaySound;
 
 public class Menu {
 
@@ -29,7 +30,11 @@ public class Menu {
     }
 
     private String getMenuString() {
-        return "1. Play\n" + "Q. Quit";
+        StringBuilder sb = new StringBuilder();
+
+        return "1. Play\n"
+                +"2. AI Play\n"
+                + "Q. Quit";
 
     }
 }

@@ -1,24 +1,21 @@
 package com.stk.nns.nn;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.math.Vector2;
-import com.stk.nns.map.Level;
+import com.stk.nns.map.SnakeLevel;
 import com.stk.nns.map.Tile;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Brain {
 
     Network network;
-    Level level;
+    SnakeLevel snakeLevel;
     List<Tile> tiles;
 
-    public Brain(Level level) {
-        this.level = level;
-        this.tiles = level.getTileValues();
-        this.network = new Network(tiles.size() + 1);
+    public Brain(SnakeLevel snakeLevel) {
+        this.snakeLevel = snakeLevel;
+        this.tiles = snakeLevel.getTileValues();
+        this.network = new Network(tiles.size());
     }
 
     public int move() {

@@ -1,4 +1,4 @@
-package com.stk.nns;
+package com.stk.nns.sound;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;

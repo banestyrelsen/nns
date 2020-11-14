@@ -5,19 +5,20 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.Main;
+import com.stk.nns.game.Game;
 import com.stk.nns.snake.Snake;
 
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-public class Level {
+public class SnakeLevel {
 
-    private final float SOLID = 1.0f;
-    private final float SNAKE = 0.5f;
-    private final float EMPTY = 0.25f;
-    private final float SNAKE_HEAD = 0.1f;
-    private final float FOOD = 0.0f;
+    public final static float SOLID = -1.0f;
+    public final static float SNAKE = -0.9f;
+    public final static float EMPTY = 0.5f;
+    public final static float SNAKE_HEAD = 0.0f;
+    public final static float FOOD = 1.0f;
 
     private List<Vector2> obstacles = new ArrayList<>();
     private List<Vector2> emptyPositions = new ArrayList<>();
@@ -32,7 +33,7 @@ public class Level {
     public static int WIDTH;
     public static int HEIGHT;
 
-    public Level(String fileName) {
+    public SnakeLevel(String fileName) {
         tiles = new LinkedHashMap<>();
 
         List<String> lines = readFile(fileName);
@@ -44,8 +45,8 @@ public class Level {
         StringBuilder sb = new StringBuilder();
         for (int y = 0; y < lines.size(); y++) {
             String line = lines.get(y);
-            System.out.println(line);
-            for (int x = 0; x < line.length(); x++) {
+  /*          System.out.println(line);
+ */           for (int x = 0; x < line.length(); x++) {
                 float value = Float.parseFloat(String.valueOf(line.charAt(x))) == 1.0f ? SOLID : EMPTY;
                 Tile tile = new Tile(value,
                         new Vector2(x * Main.TILESIZE, lines.size()-y * Main.TILESIZE + Main.TILESIZE * 32 - 64));
@@ -62,7 +63,7 @@ public class Level {
         }
 
 
-        System.out.println("Done");
+/*        System.out.println("Done");*/
 
 /*        System.out.println(sb);*/
 
@@ -73,11 +74,11 @@ public class Level {
                 System.out.println("\n");
             }
         }*/
-        System.out.println("ORDERED KEYS");
+/*        System.out.println("ORDERED KEYS");
         for (Entry<TileIndex,Tile> entry:  tiles.entrySet()) {
             System.out.println(entry.getKey().position);
         }
-        System.out.println("<<<<<<<<<<<<<<<--------------------->");
+        System.out.println("<<<<<<<<<<<<<<<--------------------->");*/
     }
 
     private List<String> readFile(String fileName) {
@@ -147,6 +148,18 @@ public class Level {
         /*Entry<TileIndex,Tile> entry:  */
         return tiles.entrySet().stream().map(e -> e.getValue()).collect(Collectors.toList());
 
+    }
+
+    public double[] getAllFourDirectionValues(Vector2 headPosition) {
+
+        double[] array = new double[8];
+
+        array[0] = tiles.get(new TileIndex(new Vector2(headPosition.x, headPosition.y + Game.TILESIZE))).getValue();
+        array[1] = tiles.get(new TileIndex(new Vector2(headPosition.x, headPosition.y - Game.TILESIZE))).getValue();
+        array[2] = tiles.get(new TileIndex(new Vector2(headPosition.x + Game.TILESIZE, headPosition.y ))).getValue();
+        array[3] = tiles.get(new TileIndex(new Vector2(headPosition.x - Game.TILESIZE, headPosition.y))).getValue();
+
+        return array;
     }
 
     public Vector2 getSize() {

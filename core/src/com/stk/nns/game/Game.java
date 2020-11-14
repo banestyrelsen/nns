@@ -1,32 +1,33 @@
-package com.stk.nns;
+package com.stk.nns.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.input.GameInputProcessor;
-import com.stk.nns.map.Level;
+import com.stk.nns.map.SnakeLevel;
 import com.stk.nns.snake.Control;
 import com.stk.nns.snake.Snake;
+import com.stk.nns.sound.PlaySound;
 
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
-public class Game {
+public abstract class Game {
 
     SpriteBatch batch;
     static Texture tileWall;
     static Texture textureSnakeHead;
     static Texture textureSnakeBody;
     static Texture tileFood;
-    Level level;
-    private OrthographicCamera camera;
-    GameInputProcessor gameInputProcessor;
+    SnakeLevel snakeLevel;
+    protected OrthographicCamera camera;
+    GameInputProcessor inputProcessor;
 
     public static int WIDTH;
     public static int HEIGHT;
@@ -41,7 +42,7 @@ public class Game {
 
     public static final int TILESIZE = 32;
 
-    private boolean GAME_OVER = false;
+    protected boolean GAME_OVER = false;
     BitmapFont mainFont;
     BitmapFont mainFontRed;
     PlaySound playSound;
@@ -51,15 +52,34 @@ public class Game {
     long timeUntilStarvation = 10200;
     long timeLeft = timeUntilStarvation;
 
+    public InputProcessor getGameInputProcessor() {
+        return inputProcessor;
+    }
+    protected int snakeUpdateInterval = 80; // Can be changed during the game
+
     public Game(PlaySound playSound) {
         this.playSound = playSound;
+        this.mainFont = mainFont;
+        this.mainFontRed = mainFontRed;
+        WIDTH = Gdx.graphics.getWidth();
+        HEIGHT = Gdx.graphics.getHeight();
+
+        camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.zoom = 1.5f;
+        camera.update();
+
+
+        batch = new SpriteBatch();
+        tileWall = tileWall == null ? new Texture("tile_wall.png") : tileWall;
+        textureSnakeHead = textureSnakeHead == null ? new Texture("tile_head.png") : textureSnakeHead;
+        textureSnakeBody  = textureSnakeBody == null ? new Texture("tile_snake_body.png") : textureSnakeBody;
+        tileFood = tileFood == null ? new Texture("tile_food.png") : tileFood;
+
+
     }
 
-    public GameInputProcessor getGameInputProcessor() {
-        return gameInputProcessor;
-    }
 
-    private int snakeUpdateInterval = 80;
 
 
     public void create(BitmapFont mainFont, BitmapFont mainFontRed) {
@@ -80,16 +100,15 @@ public class Game {
         textureSnakeBody  = textureSnakeBody == null ? new Texture("tile_snake_body.png") : textureSnakeBody;
         tileFood = tileFood == null ? new Texture("tile_food.png") : tileFood;
 
-        gameInputProcessor = new GameInputProcessor(camera, snake, this);
+        inputProcessor = new GameInputProcessor(camera, snake, this);
+        Gdx.input.setInputProcessor(inputProcessor);
 
-        Gdx.input.setInputProcessor(gameInputProcessor);
 
-        newGame();
 
     }
 
-    private void newGame() {
-        GAME_OVER = false;
+    protected void newGame() {
+/*        GAME_OVER = false;
         level = new Level("maps/map0.map");
         snake = new Snake(Control.AI_CONTROLLED, new Vector2(480f, 576), level, playSound);
         timeStarted = Instant.now();
@@ -104,21 +123,23 @@ public class Game {
 
         level.placeFood();
 
-        gameInputProcessor.setSnake(snake);
+        playerGameInputProcessor.setSnake(snake);*/
 
     }
 
-    private void update() {
+    protected void update() {
         if (!GAME_OVER) {
             if (snake.eat()) {
-                level.placeFood();
+                snakeLevel.placeFood();
             }
 
             if (Instant.now().toEpochMilli() - prevSnakeUpdate.toEpochMilli() > snakeUpdateInterval) {
 
                 if (!snake.move()) {
                     GAME_OVER = true;
-                    playSound.gameOver();
+                    if (snake.control == Control.PLAYER_CONTROLLED) {
+                        playSound.gameOver();
+                    }
                 }
                 prevSnakeUpdate = Instant.now();
             }
@@ -141,7 +162,7 @@ public class Game {
         // Draw score
         batch.begin();
         drawSpeed();
-        mainFont.draw(batch, "" + snake.getnFeedings(), TILESIZE * 30, TILESIZE * 37);
+        mainFont.draw(batch, "" + snake.getNumberOfFeedings(), TILESIZE * 30, TILESIZE * 37);
         mainFont.draw(batch, "" + (GAME_OVER ? prevDuration : getTimeString()), TILESIZE * 0, TILESIZE * -2);
         drawTimeLeft();
 
@@ -150,7 +171,7 @@ public class Game {
 
         batch.begin();
         // Draw level
-        level.render(batch, tileWall, tileFood, textureSnakeHead, textureSnakeBody);
+        snakeLevel.render(batch, tileWall, tileFood, textureSnakeHead, textureSnakeBody);
 
         // Draw snake
 /*        snake.render(batch, tileWall, tileHead);*/

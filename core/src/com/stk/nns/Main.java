@@ -5,26 +5,30 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.stk.nns.input.GameInputProcessor;
+import com.stk.nns.game.AiGame;
+import com.stk.nns.game.PlayerGame;
 import com.stk.nns.input.MenuInputProcessor;
 import com.stk.nns.menu.Menu;
+import com.stk.nns.sound.PlaySound;
 
 public class Main extends ApplicationAdapter {
     public static final int TILESIZE = 32;
 
-    Game game;
+    PlayerGame playerGame;
+    AiGame aiGame;
     PlaySound playSound;
     Menu menu;
     BitmapFont mainFont;
     BitmapFont mainFontRed;
     MenuInputProcessor menuInputProcessor;
-    GameInputProcessor gameInputProcessor;
 
     private Mode mode = Mode.MENU;
     public static Mode newMode = Mode.MENU;
     public enum Mode {
+        MENU,
         PLAY,
-        MENU
+        AI
+
     }
 
     public void setMode(Mode newMode) {
@@ -34,7 +38,9 @@ public class Main extends ApplicationAdapter {
                 case MENU:
                     Gdx.input.setInputProcessor(menuInputProcessor);
                 case PLAY:
-                    Gdx.input.setInputProcessor(game.getGameInputProcessor());
+                    Gdx.input.setInputProcessor(playerGame.getGameInputProcessor());
+                case AI:
+                    Gdx.input.setInputProcessor(playerGame.getGameInputProcessor());
             }
         }
     }
@@ -58,9 +64,11 @@ public class Main extends ApplicationAdapter {
         menu = new Menu(playSound, mainFont);
 
 
-        game = new Game(playSound);
-        game.create(mainFont,mainFontRed);
+        playerGame = new PlayerGame(playSound);
+        playerGame.create(mainFont,mainFontRed);
 
+        aiGame = new AiGame(playSound);
+        aiGame.create(mainFont,mainFontRed);
 
         menuInputProcessor = new MenuInputProcessor();
         Gdx.input.setInputProcessor(menuInputProcessor);
@@ -83,8 +91,10 @@ public class Main extends ApplicationAdapter {
                 menu.render();
                 break;
             case PLAY:
-                game.render();
+                playerGame.render();
                 break;
+            case AI:
+                aiGame.render();
             default:
                 break;
         }
@@ -92,7 +102,7 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void dispose() {
-        game.dispose();
+        playerGame.dispose();
     }
 
 }
