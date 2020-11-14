@@ -24,10 +24,11 @@ public class Snake {
 
 
     LinkedList<Vector2> body;
-
+    double[] input;
+    double[] output;
     Vector2 direction;
 
-    private final int startingLength = 2;
+    private final int startingLength = 8;
     private int lastMove = Input.Keys.UP;
     private int nextMove = Input.Keys.UP;
     int nFeedings = 0;
@@ -45,6 +46,7 @@ public class Snake {
     public final Control control;
 
     Network network;
+    float distanceToFoodAtDeath = Float.MAX_VALUE;
 
     // Constructor for player controlled snake
     public Snake(Vector2 startPos, SnakeLevel snakeLevel, PlaySound playSound) {
@@ -99,6 +101,7 @@ public class Snake {
         }
 
         // If next move is last move in reverse, repeat last move
+
         int move = isMoveLegal(nextMove) ? nextMove : lastMove;
 
 
@@ -121,8 +124,17 @@ public class Snake {
                 body.get(0).y + direction.y * Main.TILESIZE);
 
         if (collide(newHead)) {
+
             isAlive = false;
             finalLifeSpan = Instant.now().toEpochMilli() - born.toEpochMilli();
+            distanceToFoodAtDeath = snakeLevel.getDistanceToFood(newHead);
+/*
+            for (int i = 0; i < 1000; i++) {
+                double[] target = snakeLevel.getTarget(nextMove, body.get(0), newHead, input, output);
+                network.train(input, target, 0.3);
+            }
+*/
+
             return false;
         }
 
@@ -140,13 +152,13 @@ public class Snake {
 
 
     public void aiSetNextMove() {
-        double[] input = snakeLevel.getAllFourDirectionValues(body.get(0));
+        input = snakeLevel.getAllFourDirectionValues(body.get(0));
         if (input.length != 8) {
             throw new IllegalStateException("Input length must be 8");
         }
-        getCartesianDirection(body.get(0), snakeLevel.getFoodPosition(), input);
+        getCartesianDirection(body.get(0), snakeLevel.getFoodPosition());
 
-        double[] output = network.calculate(input);
+        output = network.calculate(input);
 /*        System.out.println("input: " + Arrays.toString(input));
         System.out.println("output: " + Arrays.toString(output));*/
 
@@ -260,34 +272,41 @@ public class Snake {
         return network;
     }
 
-    public double[] getCartesianDirection(Vector2 a, Vector2 b, double[] array) {
+    public void getCartesianDirection(Vector2 a, Vector2 b) {
 
         Vector2 direction = new Vector2(b.x - a.x, b.y-a.y);
 
-        array[4] = 0f;
-        array[5] = 0f;
-        array[6] = 0f;
-        array[7] = 0f;
+        input[4] = 0f;
+        input[5] = 0f;
+        input[6] = 0f;
+        input[7] = 0f;
 
         if (Math.abs(direction.x) > Math.abs(direction.y)) {
             // Left or right
             if (direction.x > 0) {
                 /*return Snake.RIGHT;*/
-                array[6] = 1.0f;
+                input[7] = 1.0f;
             } else {
 /*                return Snake.LEFT;*/
-                array[7] = 1.0f;
+                input[6] = 1.0f;
             }
         } else {
             // Up or down
             if (direction.y > 0) {
 /*                return Snake.UP;*/
-                array[4] = 1.0f;
+                input[4] = 1.0f;
             } else {
 /*                return Snake.DOWN;*/
-                array[5] = 1.0f;
+                input[5] = 1.0f;
             }
         }
-        return array;
+    }
+
+    public int getLastMove() {
+        return lastMove;
+    }
+
+    public Float getDistanceToFoodAtDeath() {
+        return distanceToFoodAtDeath;
     }
 }

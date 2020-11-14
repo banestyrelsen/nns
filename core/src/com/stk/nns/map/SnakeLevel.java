@@ -1,6 +1,7 @@
 package com.stk.nns.map;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -45,14 +46,15 @@ public class SnakeLevel {
         StringBuilder sb = new StringBuilder();
         for (int y = 0; y < lines.size(); y++) {
             String line = lines.get(y);
-  /*          System.out.println(line);
- */           for (int x = 0; x < line.length(); x++) {
+            /*          System.out.println(line);
+             */
+            for (int x = 0; x < line.length(); x++) {
                 float value = Float.parseFloat(String.valueOf(line.charAt(x))) == 1.0f ? SOLID : EMPTY;
                 Tile tile = new Tile(value,
-                        new Vector2(x * Main.TILESIZE, lines.size()-y * Main.TILESIZE + Main.TILESIZE * 32 - 64));
+                        new Vector2(x * Main.TILESIZE, lines.size() - y * Main.TILESIZE + Main.TILESIZE * 32 - 64));
                 tiles.put(new TileIndex(tile.getPosition()), tile);
 
-                sb.append((int)tile.getPosition().x +","+ (int)tile.getPosition().y + " ");
+                sb.append((int) tile.getPosition().x + "," + (int) tile.getPosition().y + " ");
                 if (tile.getValue() == 1) {
                     obstacles.add(tile.getPosition());
                 } else {
@@ -63,9 +65,9 @@ public class SnakeLevel {
         }
 
 
-/*        System.out.println("Done");*/
+        /*        System.out.println("Done");*/
 
-/*        System.out.println(sb);*/
+/*                System.out.println(sb);*/
 
 /*        for (Entry<TileIndex, Tile> entry : tiles.entrySet()) {
             Tile tile = entry.getValue();
@@ -118,6 +120,12 @@ public class SnakeLevel {
 
     }
 
+    public void placeFood(Vector2 newPosition) {
+        Tile tile = tiles.get(new TileIndex(newPosition));
+        tile.setValue(FOOD);
+        foodPosition = newPosition;
+    }
+
     public Vector2 getFoodPosition() {
         return foodPosition;
     }
@@ -156,7 +164,7 @@ public class SnakeLevel {
 
         array[0] = tiles.get(new TileIndex(new Vector2(headPosition.x, headPosition.y + Game.TILESIZE))).getValue();
         array[1] = tiles.get(new TileIndex(new Vector2(headPosition.x, headPosition.y - Game.TILESIZE))).getValue();
-        array[2] = tiles.get(new TileIndex(new Vector2(headPosition.x + Game.TILESIZE, headPosition.y ))).getValue();
+        array[2] = tiles.get(new TileIndex(new Vector2(headPosition.x + Game.TILESIZE, headPosition.y))).getValue();
         array[3] = tiles.get(new TileIndex(new Vector2(headPosition.x - Game.TILESIZE, headPosition.y))).getValue();
 
         return array;
@@ -176,5 +184,120 @@ public class SnakeLevel {
 
     public boolean collide(Vector2 position) {
         return tiles.get(new TileIndex(position)).getValue() == SOLID;
+    }
+
+    public double[] getTarget(int moveAttempted, Vector2 posBeforeMove, Vector2 move, double[] input, double[] output) {
+
+/*        System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+        System.out.println("input: " + Arrays.toString(input));
+        System.out.println("output: " + Arrays.toString(output));*/
+
+
+        // What direction did it move?
+
+        float actual = tiles.get(new TileIndex(move)).getValue();
+
+        double[] target = new double[4];
+
+        float up =  tiles.get(new TileIndex(new Vector2(posBeforeMove.x, posBeforeMove.y + Game.TILESIZE))).getValue();
+        float down =  tiles.get(new TileIndex(new Vector2(posBeforeMove.x, posBeforeMove.y - Game.TILESIZE))).getValue();
+
+        float left =  tiles.get(new TileIndex(new Vector2(posBeforeMove.x - Game.TILESIZE, posBeforeMove.y))).getValue();
+        float right =  tiles.get(new TileIndex(new Vector2(posBeforeMove.x + Game.TILESIZE, posBeforeMove.y))).getValue();
+  /*      System.out.println("up: " + up + ", down: " + down + ", left" + left + ", right: "+ right);*/
+
+
+        target[0] = up;
+        target[1] = down;
+        target[2] = left;
+        target[3] = right;
+
+        if (moveAttempted == Input.Keys.UP) {
+            target[0] = actual;
+        }
+        if (moveAttempted == Input.Keys.DOWN) {
+            target[1] = actual;
+        }
+        if (moveAttempted == Input.Keys.LEFT) {
+            target[2] = actual;
+        }
+        if (moveAttempted == Input.Keys.RIGHT) {
+            target[3] = actual;
+        }
+
+        target[getDirectionInteger(move, getFoodPosition())] = SnakeLevel.FOOD;
+
+/*        System.out.println("target: " + Arrays.toString(target));
+        Vector2 foodDirection = getDirection(move, getFoodPosition());
+        System.out.println("foodDirection: " + (foodDirection.x/Game.TILESIZE) + "," +(foodDirection.y/Game.TILESIZE));*/
+
+
+
+
+        // Avoid wall/body
+
+
+        // Move toward fruit
+
+
+/*        input[4] = 0f; // UP
+        input[5] = 0f; // DOWN
+        input[6] = 0f; // LEFT
+        input[7] = 0f; // RIGHT*/
+
+/*        double up = output[0];
+        double down = output[1];
+        double left = output[2];
+        double right = output[3];*/
+
+        /*        if (Math.abs(direction.x) > Math.abs(direction.y)) {
+            // Left or right
+            if (direction.x > 0) {
+                *//*return Snake.RIGHT;*//*
+                array[6] = 1.0f;
+            } else {
+                *//*                return Snake.LEFT;*//*
+                array[7] = 1.0f;
+            }
+        } else {
+            // Up or down
+            if (direction.y > 0) {
+                *//*                return Snake.UP;*//*
+                array[4] = 1.0f;
+            } else {
+                *//*                return Snake.DOWN;*//*
+                array[5] = 1.0f;
+            }
+        }*/
+
+        return target;
+    }
+
+    public Vector2 getDirection(Vector2 a, Vector2 b) {
+        return new Vector2(b.x - a.x, b.y-a.y);
+    }
+
+    public int getDirectionInteger(Vector2 a, Vector2 b) {
+
+        Vector2 direction = getDirection(a,b);
+
+        if (Math.abs(direction.x) > Math.abs(direction.y)) {
+            if (direction.x > 0) {
+                return 3;
+            } else {
+                return 2;
+            }
+        } else {
+            if (direction.y > 0) {
+                return 0;
+            } else {
+                return 1;
+            }
+        }
+    }
+
+
+    public float getDistanceToFood(Vector2 snakeHead) {
+        return getDirection(this.foodPosition, snakeHead).len();
     }
 }

@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.input.GameInputProcessor;
 import com.stk.nns.map.SnakeLevel;
 import com.stk.nns.snake.Control;
@@ -55,7 +56,7 @@ public abstract class Game {
     public InputProcessor getGameInputProcessor() {
         return inputProcessor;
     }
-    protected int snakeUpdateInterval = 80; // Can be changed during the game
+    protected int snakeUpdateInterval = 20; // Can be changed during the game
 
     public Game(PlaySound playSound) {
         this.playSound = playSound;
@@ -130,7 +131,20 @@ public abstract class Game {
     protected void update() {
         if (!GAME_OVER) {
             if (snake.eat()) {
-                snakeLevel.placeFood();
+                if (snake.control == Control.AI_CONTROLLED) {
+                    if (snake.getNumberOfFeedings() == 1) {
+                        snakeLevel.placeFood(new Vector2(256f, 256f));
+                    } else if (snake.getNumberOfFeedings() == 2) {
+                        snakeLevel.placeFood(new Vector2(768f, 768f));
+                    }else if (snake.getNumberOfFeedings() == 3) {
+                        snakeLevel.placeFood(new Vector2(768f, 256f));
+                    } else {
+                        snakeLevel.placeFood();
+                    }
+
+                } else {
+                    snakeLevel.placeFood();
+                }
             }
 
             if (Instant.now().toEpochMilli() - prevSnakeUpdate.toEpochMilli() > snakeUpdateInterval) {
@@ -200,7 +214,7 @@ public abstract class Game {
         mainFontRed.dispose();
     }
 
-    private void drawSpeed() {
+    protected void drawSpeed() {
         mainFont.draw(batch, "" + getSpeed(), TILESIZE * 0, TILESIZE * 37);
     }
 
@@ -214,11 +228,11 @@ public abstract class Game {
 
     }
 
-    private int getSpeed() {
+    protected int getSpeed() {
         return ((slowest - (snakeUpdateInterval - fastest)) / 2);
     }
 
-    private String getTimeString() {
+    protected String getTimeString() {
         long duration = Instant.now().toEpochMilli() - timeStarted.toEpochMilli();
 
         prevDuration = String.format("%01d.%02d",
@@ -228,7 +242,7 @@ public abstract class Game {
         return prevDuration;
     }
 
-    private String getTimeRemaining() {
+    protected String getTimeRemaining() {
         long sinceAte = Instant.now().toEpochMilli() - snake.getLastAte().toEpochMilli();
         timeLeft = timeUntilStarvation - sinceAte;
 
@@ -236,7 +250,7 @@ public abstract class Game {
         return prevTimeleft;
     }
 
-    private void drawTimeLeft() {
+    protected void drawTimeLeft() {
         BitmapFont font = mainFont;
         if (timeLeft < 4000) {
             font = mainFontRed;

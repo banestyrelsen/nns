@@ -30,7 +30,7 @@ public class AiGame extends Game {
         super.create(mainFont, mainFontRed);
 
         snakes = new ArrayList<>();
-        snakeUpdateInterval = 8;
+        snakeUpdateInterval = 0;
         inputProcessor = new GameInputProcessor(camera, snake, this);
         firstGeneration();
     }
@@ -43,7 +43,11 @@ public class AiGame extends Game {
     private void nextGeneration() {
         generation++;
         currentSnakeIndex = 0;
-        childNetworks = Recombinator.recombine(snakes);
+        if (generation > 100) {
+            snakeUpdateInterval = 8;
+        }
+        System.out.println("%%%%%%%%%%%%%%%%% GENERATION " + generation +" %%%%%%%%%%%%%%%%%");
+        childNetworks = Recombinator.recombine(snakes, generation);
         snakes = new ArrayList<>();
         newGame();
     }
@@ -54,7 +58,7 @@ public class AiGame extends Game {
         snakeLevel = new SnakeLevel("maps/map0.map");
         Network network;
         if (generation == 1) {
-            network = new Network(8, 8,8, 4);
+            network = new Network(8, 5, 4);
         } else {
              network = childNetworks.get(currentSnakeIndex);
         }
@@ -71,7 +75,7 @@ public class AiGame extends Game {
         timeUntilStarvation = 10200;
         timeLeft = timeUntilStarvation;
 
-        snakeLevel.placeFood();
+        snakeLevel.placeFood(new Vector2(256f, 768f));
 
 
     }
@@ -98,7 +102,7 @@ public class AiGame extends Game {
     public void render() {
         super.render();
         batch.begin();
-        mainFont.draw(batch, "G " + generation + ", child " + (currentSnakeIndex + 1), TILESIZE * 0, TILESIZE * 41);
+        mainFont.draw(batch, "" + generation + "." + (currentSnakeIndex + 1), TILESIZE * 14, TILESIZE * 37);
         batch.end();
     }
 }
