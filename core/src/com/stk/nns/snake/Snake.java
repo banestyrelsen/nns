@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.Main;
 import com.stk.nns.PlaySound;
 import com.stk.nns.map.Level;
+import com.stk.nns.nn.Brain;
 
 import java.time.Instant;
 import java.util.LinkedList;
@@ -28,8 +29,13 @@ public class Snake {
     PlaySound playSound;
 
     Level level;
+    Brain brain;
 
-    public Snake(Vector2 startPos, Level level, PlaySound playSound) {
+    Control control;
+
+    // Constructor for player controlled snake
+    public Snake(Control control, Vector2 startPos, Level level, PlaySound playSound) {
+        this.control = control;
         body = new LinkedList<>();
         body.add(new Vector2(startPos.x, startPos.y));
         for (int i = 1; i < startingLength; i++) {
@@ -38,7 +44,12 @@ public class Snake {
         this.level = level;
         this.playSound = playSound;
         this.direction = new Vector2(0, -1);
+
+        if (control == Control.AI_CONTROLLED) {
+            brain = new Brain(level);
+        }
     }
+
 
     public void setNextMove(int nextMove) {
         this.nextMove = nextMove;

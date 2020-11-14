@@ -7,7 +7,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.Main;
 import com.stk.nns.snake.Snake;
 
-import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -15,7 +14,7 @@ import java.util.stream.Collectors;
 public class Level {
 
     private final float SOLID = 1.0f;
-    private final float SNAKE = 0.5f;
+    private final float SNAKE_HEAD = 0.5f;
     private final float EMPTY = 0.25f;
     private final float FOOD = 0.0f;
 
@@ -27,13 +26,13 @@ public class Level {
 
     Random rnd = new Random();
 
-    HashMap<TileIndex, Tile> tiles;
+    LinkedHashMap<TileIndex, Tile> tiles;
 
     public static int WIDTH;
     public static int HEIGHT;
 
     public Level(String fileName) {
-        tiles = new HashMap<>();
+        tiles = new LinkedHashMap<>();
 
         List<String> lines = readFile(fileName);
 
@@ -64,7 +63,7 @@ public class Level {
 
         System.out.println("Done");
 
-        System.out.println(sb);
+/*        System.out.println(sb);*/
 
 /*        for (Entry<TileIndex, Tile> entry : tiles.entrySet()) {
             Tile tile = entry.getValue();
@@ -73,6 +72,11 @@ public class Level {
                 System.out.println("\n");
             }
         }*/
+        System.out.println("ORDERED KEYS");
+        for (Entry<TileIndex,Tile> entry:  tiles.entrySet()) {
+            System.out.println(entry.getKey().position);
+        }
+        System.out.println("<<<<<<<<<<<<<<<--------------------->");
     }
 
     private List<String> readFile(String fileName) {
@@ -113,13 +117,13 @@ public class Level {
     }
 
     public void updateSnakePosition(Vector2 newHeadPosition, Vector2 lastPosition) {
-        tiles.get(new TileIndex(newHeadPosition)).setValue(SNAKE);
+        tiles.get(new TileIndex(newHeadPosition)).setValue(SNAKE_HEAD);
         tiles.get(new TileIndex(lastPosition)).setValue(EMPTY);
     }
 
     public List<Vector2> getSnakePositions() {
         List<Entry<TileIndex, Tile>> entries = tiles.entrySet().stream().filter(
-                e -> e.getValue().getValue() == SNAKE).collect(Collectors.toList());
+                e -> e.getValue().getValue() == SNAKE_HEAD).collect(Collectors.toList());
 
         return entries.stream().map(e -> e.getValue().getPosition()).collect(Collectors.toList());
     }
@@ -128,10 +132,16 @@ public class Level {
         return tiles.get(new TileIndex(position));
     }
 
-    public HashMap<TileIndex, Tile> getTiles() {
+    public LinkedHashMap<TileIndex, Tile> getTiles() {
         return tiles;
     }
 
+    public List<Tile> getTileValues() {
+
+        /*Entry<TileIndex,Tile> entry:  */
+        return tiles.entrySet().stream().map(e -> e.getValue()).collect(Collectors.toList());
+
+    }
 
     public Vector2 getSize() {
         return new Vector2(WIDTH, HEIGHT);

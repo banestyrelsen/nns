@@ -61,6 +61,7 @@ public class Main extends ApplicationAdapter {
         game = new Game(playSound);
         game.create(mainFont,mainFontRed);
 
+
         menuInputProcessor = new MenuInputProcessor();
         Gdx.input.setInputProcessor(menuInputProcessor);
 

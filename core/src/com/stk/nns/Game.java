@@ -11,16 +11,18 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.input.GameInputProcessor;
 import com.stk.nns.map.Level;
+import com.stk.nns.snake.Control;
 import com.stk.nns.snake.Snake;
 
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 public class Game {
+
     SpriteBatch batch;
-    Texture tileWall;
-    Texture tileHead;
-    Texture tileFood;
+    static Texture tileWall;
+    static Texture tileHead;
+    static Texture tileFood;
     Level level;
     private OrthographicCamera camera;
     GameInputProcessor gameInputProcessor;
@@ -72,28 +74,22 @@ public class Game {
 
 
         batch = new SpriteBatch();
-        tileWall = new Texture("tile_wall.png");
-        tileHead = new Texture("tile_head_up.png");
-        tileFood = new Texture("tile_food.png");
-
+        tileWall = tileWall == null ? new Texture("tile_wall.png") : tileWall;
+        tileHead = tileHead == null ? new Texture("tile_head_up.png") : tileHead;
+        tileFood = tileFood == null ? new Texture("tile_food.png") : tileFood;
 
         gameInputProcessor = new GameInputProcessor(camera, snake, this);
 
         Gdx.input.setInputProcessor(gameInputProcessor);
 
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         newGame();
 
     }
 
     private void newGame() {
         GAME_OVER = false;
-        level = new Level("maps/map1.map");
-        snake = new Snake(new Vector2(480f, 576), level, playSound);
+        level = new Level("maps/map0.map");
+        snake = new Snake(Control.AI_CONTROLLED, new Vector2(480f, 576), level, playSound);
         timeStarted = Instant.now();
         prevSnakeUpdate = timeStarted;
         prevSpeedUpdate = timeStarted;

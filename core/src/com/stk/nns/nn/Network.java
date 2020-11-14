@@ -11,12 +11,12 @@ public class Network {
     public final int OUTPUT_SIZE;
     public final int NETWORK_SIZE;
 
-    private double[][] output;  // [layer][neuron]
-    private double[][][] weight; // [layer][currentNeuron][connectedNeuronInPreviousLayer]
-    private double[][] bias; // [layer][neuron]
+    protected double[][] output;  // [layer][neuron]
+    protected double[][][] weight; // [layer][currentNeuron][connectedNeuronInPreviousLayer]
+    protected double[][] bias; // [layer][neuron]
 
-    private double[][] error_signal;
-    private double[][] output_derivative;
+    protected double[][] error_signal;
+    protected double[][] output_derivative;
 
     public Network(int... NETWORK_LAYER_SIZES) {
         this.NETWORK_LAYER_SIZES = NETWORK_LAYER_SIZES;
@@ -43,6 +43,59 @@ public class Network {
             }
         }
     }
+
+    // Recombination
+    public Network (Network a, Network b) {
+        Random random = new Random();
+
+        this.NETWORK_LAYER_SIZES = a.NETWORK_LAYER_SIZES;
+        this.NETWORK_SIZE = a.NETWORK_LAYER_SIZES.length;
+        this.INPUT_SIZE = a.NETWORK_LAYER_SIZES[0];
+        this.OUTPUT_SIZE = a.NETWORK_LAYER_SIZES[NETWORK_SIZE-1];
+
+        this.output = new double[NETWORK_SIZE][];
+        this.weight = new double[NETWORK_SIZE][][];
+        this.bias = new double[NETWORK_SIZE][];
+        this.error_signal = new double[NETWORK_SIZE][];
+        this.output_derivative = new double[NETWORK_SIZE][];
+
+        for (int i = 0; i < NETWORK_SIZE; i++) {
+            this.output[i] = new double[NETWORK_LAYER_SIZES[i]];
+            this.error_signal[i] = new double[NETWORK_LAYER_SIZES[i]];
+            this.output_derivative[i] = new double[NETWORK_LAYER_SIZES[i]];
+
+            this.bias[i] = new double[a.bias[i].length];
+            for (int biasIndex = 0; biasIndex < bias[i].length; biasIndex++) {
+                bias[i][biasIndex] = random.nextBoolean() ? a.bias[i][biasIndex] : b.bias[i][biasIndex];
+                if (random.nextFloat() > 0.03f) {
+                    System.out.println("BIAS MUTATION!");
+                    bias[i][biasIndex] = random.nextFloat();
+                }
+            }
+
+            // Create weights array for every layer except the first (input) layer
+            if (i > 0) {
+                this.weight[i] = new double[NETWORK_LAYER_SIZES[i]][NETWORK_LAYER_SIZES[i-1]];
+                for(int currentNeuron = 0; currentNeuron < NETWORK_LAYER_SIZES[i]; currentNeuron++){
+                    for(int connectedNeuronInPreviousLayer = 0; connectedNeuronInPreviousLayer < NETWORK_LAYER_SIZES[i-1]; connectedNeuronInPreviousLayer++){
+                        weight[i][currentNeuron][connectedNeuronInPreviousLayer] = random.nextBoolean() ?
+                                a.weight[i][currentNeuron][connectedNeuronInPreviousLayer] :
+                                b.weight[i][currentNeuron][connectedNeuronInPreviousLayer];
+                        if (random.nextFloat() > 0.03f) {
+                            System.out.println("WEIGHT MUTATION!");
+                            weight[i][currentNeuron][connectedNeuronInPreviousLayer] = random.nextFloat();
+                        }
+                    }
+                }
+
+
+                this.weight[i]  = NetworkTools.createRandomArray(NETWORK_LAYER_SIZES[i],NETWORK_LAYER_SIZES[i-1], -0.3,0.5);
+            }
+        }
+    }
+
+
+
 
     public double[] calculate(double... input) {
         if (input.length != this.INPUT_SIZE) {
@@ -108,7 +161,14 @@ public class Network {
     }
 
     public static void main(String[] args) {
-        Network net = new Network(1024,16,16,4);
+        Network a = new Network(1024,16,16,4);
+        Network b = new Network(1024,16,16,4);
+        Network c = new Network(a, b);
+
+        Network net  = c;
+
+
+/*        Network net = new Network(1024,16,16,4);*/
 
         double[] input = new double[1024];
         Random rnd = new Random();
