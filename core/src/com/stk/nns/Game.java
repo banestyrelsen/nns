@@ -21,7 +21,8 @@ public class Game {
 
     SpriteBatch batch;
     static Texture tileWall;
-    static Texture tileHead;
+    static Texture textureSnakeHead;
+    static Texture textureSnakeBody;
     static Texture tileFood;
     Level level;
     private OrthographicCamera camera;
@@ -75,7 +76,8 @@ public class Game {
 
         batch = new SpriteBatch();
         tileWall = tileWall == null ? new Texture("tile_wall.png") : tileWall;
-        tileHead = tileHead == null ? new Texture("tile_head_up.png") : tileHead;
+        textureSnakeHead = textureSnakeHead == null ? new Texture("tile_head.png") : textureSnakeHead;
+        textureSnakeBody  = textureSnakeBody == null ? new Texture("tile_snake_body.png") : textureSnakeBody;
         tileFood = tileFood == null ? new Texture("tile_food.png") : tileFood;
 
         gameInputProcessor = new GameInputProcessor(camera, snake, this);
@@ -148,10 +150,10 @@ public class Game {
 
         batch.begin();
         // Draw level
-        level.render(batch, tileWall, tileFood);
+        level.render(batch, tileWall, tileFood, textureSnakeHead, textureSnakeBody);
 
         // Draw snake
-        snake.render(batch, tileWall, tileHead);
+/*        snake.render(batch, tileWall, tileHead);*/
         batch.end();
 
         if (GAME_OVER) {

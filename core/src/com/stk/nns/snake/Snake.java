@@ -97,9 +97,10 @@ public class Snake {
         }
 
         // Drag tail
+        Vector2 prevHead = body.getFirst();
         body.addFirst(newHead);
         Vector2 removedSegment = body.removeLast();
-        level.updateSnakePosition(newHead, removedSegment);
+        level.updateSnakePosition(newHead, prevHead, removedSegment);
 
 
         lastMove = move;

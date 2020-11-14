@@ -14,8 +14,9 @@ import java.util.stream.Collectors;
 public class Level {
 
     private final float SOLID = 1.0f;
-    private final float SNAKE_HEAD = 0.5f;
+    private final float SNAKE = 0.5f;
     private final float EMPTY = 0.25f;
+    private final float SNAKE_HEAD = 0.1f;
     private final float FOOD = 0.0f;
 
     private List<Vector2> obstacles = new ArrayList<>();
@@ -84,7 +85,7 @@ public class Level {
         return Arrays.asList(mapAsString.split(System.lineSeparator()));
     }
 
-    public void render(SpriteBatch batch, Texture tileWall, Texture foodTile) {
+    public void render(SpriteBatch batch, Texture tileWall, Texture foodTile, Texture tileHead, Texture textureSnakeBody) {
 
         for (Entry<TileIndex, Tile> entry : tiles.entrySet()) {
             Tile tile = entry.getValue();
@@ -92,6 +93,10 @@ public class Level {
                 batch.draw(tileWall, tile.getPosition().x, tile.getPosition().y);
             } else if (tile.getValue() == FOOD) {
                 batch.draw(foodTile, tile.getPosition().x, tile.getPosition().y);
+            } else if (tile.getValue() == SNAKE) {
+                batch.draw(textureSnakeBody, tile.getPosition().x, tile.getPosition().y);
+            } else if (tile.getValue() == SNAKE_HEAD) {
+                batch.draw(tileHead, tile.getPosition().x, tile.getPosition().y);
             }
         }
     }
@@ -116,14 +121,15 @@ public class Level {
         return foodPosition;
     }
 
-    public void updateSnakePosition(Vector2 newHeadPosition, Vector2 lastPosition) {
+    public void updateSnakePosition(Vector2 newHeadPosition, Vector2 prevHeadPosition, Vector2 finalSegment) {
         tiles.get(new TileIndex(newHeadPosition)).setValue(SNAKE_HEAD);
-        tiles.get(new TileIndex(lastPosition)).setValue(EMPTY);
+        tiles.get(new TileIndex(prevHeadPosition)).setValue(SNAKE);
+        tiles.get(new TileIndex(finalSegment)).setValue(EMPTY);
     }
 
     public List<Vector2> getSnakePositions() {
         List<Entry<TileIndex, Tile>> entries = tiles.entrySet().stream().filter(
-                e -> e.getValue().getValue() == SNAKE_HEAD).collect(Collectors.toList());
+                e -> e.getValue().getValue() == SNAKE).collect(Collectors.toList());
 
         return entries.stream().map(e -> e.getValue().getPosition()).collect(Collectors.toList());
     }
