@@ -36,7 +36,7 @@ public abstract class Game {
     Snake snake;
     Instant timeStarted;
     Instant prevSnakeUpdate;
-    Instant prevSpeedUpdate;
+    protected Instant prevSpeedUpdate;
 
     int slowest = 200;
     int fastest = 10;
@@ -56,12 +56,10 @@ public abstract class Game {
     public InputProcessor getGameInputProcessor() {
         return inputProcessor;
     }
-    protected int snakeUpdateInterval = 20; // Can be changed during the game
+    protected int snakeUpdateInterval = 80; // Can be changed during the game
 
     public Game(PlaySound playSound) {
         this.playSound = playSound;
-        this.mainFont = mainFont;
-        this.mainFontRed = mainFontRed;
         WIDTH = Gdx.graphics.getWidth();
         HEIGHT = Gdx.graphics.getHeight();
 

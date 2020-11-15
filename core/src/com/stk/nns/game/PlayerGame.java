@@ -18,6 +18,7 @@ public class PlayerGame extends Game {
 
     public void create(BitmapFont mainFont, BitmapFont mainFontRed) {
         super.create(mainFont, mainFontRed);
+        inputProcessor = new GameInputProcessor(camera, snake, this);
         newGame();
     }
 
@@ -41,7 +42,7 @@ public class PlayerGame extends Game {
         timeLeft = timeUntilStarvation;
 
         snakeLevel.placeFood();
-        inputProcessor = new GameInputProcessor(camera, snake, this);
+        inputProcessor.setSnake(snake);
 
     }
 }

@@ -40,7 +40,7 @@ public class Main extends ApplicationAdapter {
                 case PLAY:
                     Gdx.input.setInputProcessor(playerGame.getGameInputProcessor());
                 case AI:
-                    Gdx.input.setInputProcessor(playerGame.getGameInputProcessor());
+                    Gdx.input.setInputProcessor(aiGame.getGameInputProcessor());
             }
         }
     }

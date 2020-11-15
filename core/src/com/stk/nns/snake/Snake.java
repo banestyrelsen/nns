@@ -24,7 +24,7 @@ public class Snake {
 
 
     LinkedList<Vector2> body;
-    double[] input;
+
     double[] output;
     Vector2 direction;
 
@@ -152,15 +152,30 @@ public class Snake {
 
 
     public void aiSetNextMove() {
-        input = snakeLevel.getAllFourDirectionValues(body.get(0));
+        System.out.println("\n----------------------------------------------------------------------------------------------------");
+        double[] input = snakeLevel.getNeighborTiles(body.get(0));
         if (input.length != 8) {
             throw new IllegalStateException("Input length must be 8");
         }
-        getCartesianDirection(body.get(0), snakeLevel.getFoodPosition());
+        input = getCartesianDirection(body.get(0), snakeLevel.getFoodPosition(), input);
+
+
 
         output = network.calculate(input);
+
+        System.out.println("input[0]: "+ input[0] + " = up value");
+        System.out.println("input[1]: "+ input[1] + " = down value");
+        System.out.println("input[2]: "+ input[2] + " = left value");
+        System.out.println("input[3]: "+ input[3] + " = right value");
+        System.out.println("input[4]: "+ input[4] + " = up food?");
+        System.out.println("input[5]: "+ input[5] + " = down food?");
+        System.out.println("input[6]: "+ input[6] + " = left food?");
+        System.out.println("input[7]: "+ input[7] + " = right food?");
+
+
 /*        System.out.println("input: " + Arrays.toString(input));
         System.out.println("output: " + Arrays.toString(output));*/
+
 
         if (output.length != 4) {
             throw new IllegalStateException("Output must be equal to 4");
@@ -170,6 +185,11 @@ public class Snake {
         double down = output[1];
         double left = output[2];
         double right = output[3];
+
+        System.out.println("\toutput[0]: "+ output[0] + " = network UP recommendation");
+        System.out.println("\toutput[1]: "+ output[1] + " = network DOWN recommendation");
+        System.out.println("\toutput[2]: "+ output[2] + " = network LEFT recommendation");
+        System.out.println("\toutput[3]: "+ output[3] + " = network RIGHT recommendation");
 
         int move = Input.Keys.UP;
         if (up < down) {
@@ -181,26 +201,31 @@ public class Snake {
         if (left < right) {
             move = Input.Keys.RIGHT;
         }
-/*        if (move == Input.Keys.LEFT) {
-            System.out.println("LEFT");
+        if (move == Input.Keys.LEFT) {
+            System.out.println("\t\tSnake chooses LEFT");
         } else if (move == Input.Keys.RIGHT) {
-            System.out.println("RIGHT");
+            System.out.println("\t\tSnake chooses RIGHT");
         } else if (move == Input.Keys.UP) {
-            System.out.println("UP");
+            System.out.println("\t\tSnake chooses UP");
         } else if (move == Input.Keys.DOWN) {
-            System.out.println("DOWN");
-        }*/
+            System.out.println("\t\tSnake chooses DOWN");
+        }
         setNextMove(move);
     }
 
 
     private boolean isMoveLegal(int move) {
-        return !(
+        boolean isLegal = !(
                 (lastMove == Input.Keys.UP && move == Input.Keys.DOWN) ||
                         (lastMove == Input.Keys.DOWN && move == Input.Keys.UP) ||
                         (lastMove == Input.Keys.LEFT && move == Input.Keys.RIGHT) ||
                         (lastMove == Input.Keys.RIGHT && move == Input.Keys.LEFT)
         );
+
+        if (!isLegal) {
+            System.out.println("-------------->>>>>>>>>>>>>>> ILLEGAL MOVE!!!!");
+        }
+        return isLegal;
     }
 
     public List<Vector2> getBody() {
@@ -272,34 +297,42 @@ public class Snake {
         return network;
     }
 
-    public void getCartesianDirection(Vector2 a, Vector2 b) {
+    public double[] getCartesianDirection(Vector2 snakeHead, Vector2 foodPosition, double[] input) {
 
-        Vector2 direction = new Vector2(b.x - a.x, b.y-a.y);
+        Vector2 direction = new Vector2(foodPosition.x - snakeHead.x, foodPosition.y-snakeHead.y);
+
+        System.out.println("Food direction: " + direction.x + "," + direction.y);
 
         input[4] = 0f;
         input[5] = 0f;
         input[6] = 0f;
         input[7] = 0f;
 
+
         if (Math.abs(direction.x) > Math.abs(direction.y)) {
             // Left or right
             if (direction.x > 0) {
                 /*return Snake.RIGHT;*/
+                System.out.println("food is RIGHT");
                 input[7] = 1.0f;
             } else {
+                System.out.println("food is LEFT");
 /*                return Snake.LEFT;*/
                 input[6] = 1.0f;
             }
         } else {
             // Up or down
             if (direction.y > 0) {
+                System.out.println("food is UP");
 /*                return Snake.UP;*/
                 input[4] = 1.0f;
             } else {
+                System.out.println("food is DOWN");
 /*                return Snake.DOWN;*/
                 input[5] = 1.0f;
             }
         }
+        return input;
     }
 
     public int getLastMove() {

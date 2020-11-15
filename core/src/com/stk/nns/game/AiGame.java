@@ -16,7 +16,7 @@ import java.util.List;
 public class AiGame extends Game {
 
     List<Snake> snakes;
-    int generationSize = 100;
+    int generationSize = 50;
     int generation;
     List<Network> childNetworks;
     int currentSnakeIndex = 0;
@@ -30,7 +30,7 @@ public class AiGame extends Game {
         super.create(mainFont, mainFontRed);
 
         snakes = new ArrayList<>();
-        snakeUpdateInterval = 0;
+        snakeUpdateInterval = slowest;
         inputProcessor = new GameInputProcessor(camera, snake, this);
         firstGeneration();
     }
@@ -43,9 +43,7 @@ public class AiGame extends Game {
     private void nextGeneration() {
         generation++;
         currentSnakeIndex = 0;
-        if (generation > 100) {
-            snakeUpdateInterval = 8;
-        }
+
         System.out.println("%%%%%%%%%%%%%%%%% GENERATION " + generation +" %%%%%%%%%%%%%%%%%");
         childNetworks = Recombinator.recombine(snakes, generation);
         snakes = new ArrayList<>();
@@ -64,6 +62,7 @@ public class AiGame extends Game {
         }
         snakes.add(new Snake(new Vector2(512f, 512), snakeLevel, playSound, network));
         snake = snakes.get(snakes.size()-1);
+        inputProcessor.setSnake(snake);
 
         timeStarted = Instant.now();
         prevSnakeUpdate = timeStarted;

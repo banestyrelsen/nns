@@ -158,7 +158,7 @@ public class SnakeLevel {
 
     }
 
-    public double[] getAllFourDirectionValues(Vector2 headPosition) {
+    public double[] getNeighborTiles(Vector2 headPosition) {
 
         double[] array = new double[8];
 
