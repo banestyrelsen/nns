@@ -156,7 +156,9 @@ public abstract class Game {
                 prevSnakeUpdate = Instant.now();
             }
 
-            if (timeLeft <= 1) {
+            if (snake.control == Control.PLAYER_CONTROLLED && timeLeft <= 1) {
+                GAME_OVER = true;
+            } else if (snake.control == Control.AI_CONTROLLED && snake.getMovesLeft() <1) {
                 GAME_OVER = true;
             }
         }
@@ -176,7 +178,8 @@ public abstract class Game {
         drawSpeed();
         mainFont.draw(batch, "" + snake.getNumberOfFeedings(), TILESIZE * 30, TILESIZE * 37);
         mainFont.draw(batch, "" + (GAME_OVER ? prevDuration : getTimeString()), TILESIZE * 0, TILESIZE * -2);
-        drawTimeLeft();
+        if (snake.control == Control.PLAYER_CONTROLLED) drawTimeLeft();
+        if (snake.control == Control.AI_CONTROLLED) drawMovesLeft();
 
         batch.end();
 
@@ -254,5 +257,13 @@ public abstract class Game {
             font = mainFontRed;
         }
         font.draw(batch, "" + (GAME_OVER ? prevTimeleft : getTimeRemaining()), TILESIZE * 30, TILESIZE * -2);
+    }
+
+    protected void drawMovesLeft() {
+        BitmapFont font = mainFont;
+        if (snake.getMovesLeft() < 5) {
+            font = mainFontRed;
+        }
+        font.draw(batch, "" + snake.getMovesLeft(), TILESIZE * 27, TILESIZE * -2);
     }
 }

@@ -12,11 +12,12 @@ import com.stk.nns.sound.PlaySound;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class AiGame extends Game {
 
     List<Snake> snakes;
-    int generationSize = 50;
+    int generationSize = 100;
     int generation;
     List<Network> childNetworks;
     int currentSnakeIndex = 0;
@@ -30,7 +31,7 @@ public class AiGame extends Game {
         super.create(mainFont, mainFontRed);
 
         snakes = new ArrayList<>();
-        snakeUpdateInterval = slowest;
+        snakeUpdateInterval = fastest;
         inputProcessor = new GameInputProcessor(camera, snake, this);
         firstGeneration();
     }
@@ -41,22 +42,47 @@ public class AiGame extends Game {
     }
 
     private void nextGeneration() {
+        System.out.println("%%%%%%%%%%%%%%%%% GENERATION " + generation +" %%%%%%%%%%%%%%%%%");
+        Random rnd = new Random();
         generation++;
         currentSnakeIndex = 0;
+/*        if (allZeroPoints()) {
+            firstGeneration();
+        } else {*/
+            childNetworks = Recombinator.recombine(snakes, generation);
 
-        System.out.println("%%%%%%%%%%%%%%%%% GENERATION " + generation +" %%%%%%%%%%%%%%%%%");
-        childNetworks = Recombinator.recombine(snakes, generation);
-        snakes = new ArrayList<>();
-        newGame();
+            if (allZeroPoints()) {
+                List<Network> networks = new ArrayList<>();
+                for (int i = 0; i < childNetworks.size(); i++) {
+                    networks.add(new Network(4, 4, 3));
+                }
+                childNetworks = networks;
+            }
+            snakes = new ArrayList<>();
+            newGame();
+  /*      }*/
+    }
+
+    private boolean allZeroPoints() {
+
+        for (Snake snake : snakes) {
+            if (snake.getNumberOfFeedings() > 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
 
     protected void newGame() {
+/*        if (generation < 10) {
+            snakeUpdateInterval = 0;
+        }*/
         GAME_OVER = false;
         snakeLevel = new SnakeLevel("maps/map0.map");
         Network network;
         if (generation == 1) {
-            network = new Network(8, 5, 4);
+            network = new Network(4, 4, 3);
         } else {
              network = childNetworks.get(currentSnakeIndex);
         }
@@ -71,10 +97,10 @@ public class AiGame extends Game {
         prevDuration = "";
         prevTimeleft = "";
 
-        timeUntilStarvation = 10200;
+/*        timeUntilStarvation = 4200;*/
         timeLeft = timeUntilStarvation;
 
-        snakeLevel.placeFood(new Vector2(256f, 768f));
+        snakeLevel.placeFood(new Vector2(64f, 128f));
 
 
     }

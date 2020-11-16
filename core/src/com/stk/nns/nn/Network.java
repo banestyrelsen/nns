@@ -39,14 +39,32 @@ public class Network {
             this.error_signal[i] = new double[NETWORK_LAYER_SIZES[i]];
             this.output_derivative[i] = new double[NETWORK_LAYER_SIZES[i]];
 
-            this.bias[i] = NetworkTools.createRandomArray(NETWORK_LAYER_SIZES[i], 0.0, 1.0);
+            this.bias[i] = NetworkTools.createRandomArray(NETWORK_LAYER_SIZES[i], -1.0, 1.0);
 
             // Create weights array for every layer except the first (input) layer
             if (i > 0) {
-                this.weight[i]  = NetworkTools.createRandomArray(NETWORK_LAYER_SIZES[i],NETWORK_LAYER_SIZES[i-1], 0.0,1.0);
+                this.weight[i]  = NetworkTools.createRandomArray(NETWORK_LAYER_SIZES[i],NETWORK_LAYER_SIZES[i-1], -1.0,1.0);
             }
         }
     }
+
+    public void print() {
+        System.out.println(Arrays.toString(output[0]));
+
+
+       for (int layer = 0; layer < NETWORK_SIZE; layer++) {
+            System.out.println("LAYER " + layer);
+            for (int neuron = 0; neuron < NETWORK_LAYER_SIZES[layer]; neuron++) {
+                if (layer > 0) {
+                    for (int connectedNeuronInPreviousLayer = 0; connectedNeuronInPreviousLayer < NETWORK_LAYER_SIZES[layer - 1]; connectedNeuronInPreviousLayer++) {
+                        System.out.println("[" + layer + "][" + neuron + "][" + (layer - 1) + "]weight: " + weight[layer][neuron][connectedNeuronInPreviousLayer]);
+                    }
+                }
+                System.out.println("[" + layer + "][" + neuron + "]neuron: " + output[layer][neuron] + ", bias: " + bias[layer][neuron]);
+            }
+        }
+    }
+
 
     // Recombination
     public Network (Network a, Network b) {
@@ -90,12 +108,22 @@ public class Network {
 /*                this.weight[i]  = NetworkTools.createRandomArray(NETWORK_LAYER_SIZES[i],NETWORK_LAYER_SIZES[i-1], -0.3,0.5);*/
             }
         }
-
-        if (random.nextBoolean())  {
-            mutateBias();
-        } else {
-            mutateWeight();
-        }
+for (int i = 0; i < 1; i++) {
+    if (random.nextBoolean()) {
+        mutateBias();
+    } else {
+        mutateWeight();
+    }
+}
+/*        System.out.println("==========================================================");
+        System.out.println("=======================PARENT A===========================");
+        a.print();
+        System.out.println("==========================================================");
+        System.out.println("=======================PARENT B===========================");
+        b.print();
+        System.out.println("==========================================================");
+        System.out.println("=======================PARENT C===========================");*/
+/*        this.print();*/
     }
 
     private void mutateBias() {
@@ -103,7 +131,7 @@ public class Network {
         Random random = new Random();
         int layer = random.nextInt(NETWORK_LAYER_SIZES.length-1);
         int neuron = random.nextInt(bias[layer].length-1);
-        bias[layer][neuron] = NetworkTools.randomValue(0.0,1.0);
+        bias[layer][neuron] = NetworkTools.randomValue(-1.0,1.0);
     }
 
     private void mutateWeight() {
@@ -112,7 +140,7 @@ public class Network {
         int layer = 1 + random.nextInt(NETWORK_LAYER_SIZES.length-2);
         int currentNeuron = random.nextInt(weight[layer].length-1);
         int connectedNeuronInPreviousLayer = random.nextInt(weight[layer][currentNeuron].length-1);
-        weight[layer][currentNeuron][connectedNeuronInPreviousLayer] = NetworkTools.randomValue(0.0,1.0);
+        weight[layer][currentNeuron][connectedNeuronInPreviousLayer] = NetworkTools.randomValue(-1.0,1.0);
     }
 
     public double[] calculate(double... input) {
@@ -177,9 +205,33 @@ public class Network {
             }
         }
     }
+    private static void test() {
 
+        Network net = new Network(8,4,4,4);
+
+/*
+        System.out.println("input[0]: "+ input[0] + " = up value");
+        System.out.println("input[1]: "+ input[1] + " = down value");
+        System.out.println("input[2]: "+ input[2] + " = left value");
+        System.out.println("input[3]: "+ input[3] + " = right value");
+        System.out.println("input[4]: "+ input[4] + " = up food?");
+        System.out.println("input[5]: "+ input[5] + " = down food?");
+        System.out.println("input[6]: "+ input[6] + " = left food?");
+        System.out.println("input[7]: "+ input[7] + " = right food?");
+*/
+
+        double[] input = new double[]{SnakeLevel.EMPTY,SnakeLevel.EMPTY,SnakeLevel.EMPTY,SnakeLevel.EMPTY, 0d,0d,1.0d,0d};
+        double[] target = new double[]{0,0,1,0};
+
+        for (int i = 0; i < 1000; i++) {
+            net.train(input, target, 0.3);
+        }
+        double[] o = net.calculate(input);
+        System.out.println(Arrays.toString(o));
+    }
     public static void main(String[] args) {
-        Network net = new Network(5,4,4,4);
+        test();
+/*        Network net = new Network(5,4,4,4);
 
         double[] input = new double[]{
                     SnakeLevel.EMPTY,   // UP
@@ -187,7 +239,7 @@ public class Network {
                     SnakeLevel.EMPTY,   // LEFT
                     SnakeLevel.EMPTY,   // RIGHT
                             Snake.UP    // FOOD DIRECTION
-        };
+        };*/
 
 /*        net.calculate()*/
 
@@ -198,7 +250,7 @@ public class Network {
         Network net  = c;*/
 
 
-/*        Network net = new Network(1024,16,16,4);*/
+        Network net = new Network(1024,16,16,4);
 
   /*      double[] input = new double[1024];
         Random rnd = new Random();
@@ -211,11 +263,15 @@ public class Network {
         Instant before;
         for (int i = 0; i < 1000; i++) {
             net.train(input, target, 0.3);
-        }*/
+        }
 
         double[] o = net.calculate(input);
         System.out.println(Arrays.toString(o));
 
+   */
     }
+
+
+
 }
 

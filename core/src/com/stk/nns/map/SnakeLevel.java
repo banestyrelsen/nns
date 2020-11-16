@@ -25,8 +25,6 @@ public class SnakeLevel {
     private List<Vector2> emptyPositions = new ArrayList<>();
     private Vector2 foodPosition;
 
-    private Snake snake;
-
     Random rnd = new Random();
 
     LinkedHashMap<TileIndex, Tile> tiles;
@@ -67,7 +65,7 @@ public class SnakeLevel {
 
         /*        System.out.println("Done");*/
 
-/*                System.out.println(sb);*/
+        /*                System.out.println(sb);*/
 
 /*        for (Entry<TileIndex, Tile> entry : tiles.entrySet()) {
             Tile tile = entry.getValue();
@@ -158,14 +156,92 @@ public class SnakeLevel {
 
     }
 
+    public double[] getTileOptions(Vector2 snakeHead, int left, int forward, int right) {
+
+        double[] tileOptions = new double[4];
+
+        tileOptions[0] = getDirectionValue(left, snakeHead);
+        tileOptions[1] = getDirectionValue(forward, snakeHead);
+        tileOptions[2] = getDirectionValue(right, snakeHead);
+
+        return tileOptions;
+    }
+
+    private float getDirectionValue(int direction, Vector2 headPosition) {
+        switch (direction) {
+            case Input.Keys.UP:
+                return tiles.get(new TileIndex(new Vector2(headPosition.x, headPosition.y + Game.TILESIZE))).getValue();
+            case Input.Keys.DOWN:
+                return tiles.get(new TileIndex(new Vector2(headPosition.x, headPosition.y - Game.TILESIZE))).getValue();
+            case Input.Keys.LEFT:
+                return tiles.get(new TileIndex(new Vector2(headPosition.x - Game.TILESIZE, headPosition.y))).getValue();
+            case Input.Keys.RIGHT:
+                return tiles.get(new TileIndex(new Vector2(headPosition.x + Game.TILESIZE, headPosition.y))).getValue();
+            default:
+                throw new IllegalStateException("Invalid direction " + direction);
+        }
+    }
+
+    public int getFoodDirection(Vector2 snakeHead, int lastMove, int forward) {
+
+        Vector2 foodDirection = getDirection(snakeHead, foodPosition);
+
+        int direction;
+
+        if (Math.abs(foodDirection.x) > Math.abs(foodDirection.y)) {
+            if (foodDirection.x > 0) {
+                direction = Input.Keys.RIGHT; // 22
+            } else {
+                direction = Input.Keys.LEFT; // 21
+            }
+        } else {
+            if (foodDirection.y > 0) {
+                direction = Input.Keys.UP; // 19
+            } else {
+                direction = Input.Keys.DOWN; // 20
+            }
+        }
+
+/*        if (direction == lastMove) {
+            if (lastMove == Input.Keys.UP || lastMove == Input.Keys.DOWN) {
+                direction = foodDirection.x > 0 ?  Input.Keys.RIGHT : Input.Keys.LEFT;
+            } else if (lastMove == Input.Keys.LEFT || lastMove == Input.Keys.RIGHT) {
+                direction = foodDirection.y > 0 ?  Input.Keys.UP : Input.Keys.DOWN;
+            } else {
+                throw new IllegalStateException("Direction should be a valid Input.Keys integer value but was " + direction);
+            }
+        }*/
+        return direction;
+    }
+
+    public int getDirectionKeyInteger(Vector2 a, Vector2 b) {
+
+        Vector2 direction = getDirection(b, a);
+
+        if (Math.abs(direction.x) > Math.abs(direction.y)) {
+            if (direction.x > 0) {
+                return Input.Keys.RIGHT;
+            } else {
+                return Input.Keys.LEFT;
+            }
+        } else {
+            if (direction.y > 0) {
+                return Input.Keys.UP;
+            } else {
+                return Input.Keys.DOWN;
+            }
+        }
+    }
+
+
     public double[] getNeighborTiles(Vector2 headPosition) {
 
         double[] array = new double[8];
 
-        array[0] = tiles.get(new TileIndex(new Vector2(headPosition.x, headPosition.y + Game.TILESIZE))).getValue();
-        array[1] = tiles.get(new TileIndex(new Vector2(headPosition.x, headPosition.y - Game.TILESIZE))).getValue();
-        array[2] = tiles.get(new TileIndex(new Vector2(headPosition.x + Game.TILESIZE, headPosition.y))).getValue();
-        array[3] = tiles.get(new TileIndex(new Vector2(headPosition.x - Game.TILESIZE, headPosition.y))).getValue();
+        array[0] = tiles.get(new TileIndex(new Vector2(headPosition.x, headPosition.y + Game.TILESIZE))).getValue(); // up
+        array[1] = tiles.get(new TileIndex(new Vector2(headPosition.x, headPosition.y - Game.TILESIZE))).getValue(); // down
+        array[2] = tiles.get(new TileIndex(new Vector2(headPosition.x - Game.TILESIZE, headPosition.y))).getValue(); // left
+        array[3] = tiles.get(new TileIndex(new Vector2(headPosition.x + Game.TILESIZE, headPosition.y))).getValue(); // right
 
         return array;
     }
@@ -175,15 +251,18 @@ public class SnakeLevel {
     }
 
     public List<Vector2> getObstacles() {
-        return obstacles;
-    }
+        return obstacles;  }
 
-    public List<Vector2> getEmptyPositions() {
+
+public List<Vector2> getEmptyPositions() {
         return emptyPositions;
     }
 
     public boolean collide(Vector2 position) {
-        return tiles.get(new TileIndex(position)).getValue() == SOLID;
+        float value = tiles.get(new TileIndex(position)).getValue();
+/*        if (value < 0f)
+        System.out.println("COLLIDE VALUE: " + value);*/
+        return value == SOLID || value == SNAKE;
     }
 
     public double[] getTarget(int moveAttempted, Vector2 posBeforeMove, Vector2 move, double[] input, double[] output) {
@@ -199,12 +278,12 @@ public class SnakeLevel {
 
         double[] target = new double[4];
 
-        float up =  tiles.get(new TileIndex(new Vector2(posBeforeMove.x, posBeforeMove.y + Game.TILESIZE))).getValue();
-        float down =  tiles.get(new TileIndex(new Vector2(posBeforeMove.x, posBeforeMove.y - Game.TILESIZE))).getValue();
+        float up = tiles.get(new TileIndex(new Vector2(posBeforeMove.x, posBeforeMove.y + Game.TILESIZE))).getValue();
+        float down = tiles.get(new TileIndex(new Vector2(posBeforeMove.x, posBeforeMove.y - Game.TILESIZE))).getValue();
 
-        float left =  tiles.get(new TileIndex(new Vector2(posBeforeMove.x - Game.TILESIZE, posBeforeMove.y))).getValue();
-        float right =  tiles.get(new TileIndex(new Vector2(posBeforeMove.x + Game.TILESIZE, posBeforeMove.y))).getValue();
-  /*      System.out.println("up: " + up + ", down: " + down + ", left" + left + ", right: "+ right);*/
+        float left = tiles.get(new TileIndex(new Vector2(posBeforeMove.x - Game.TILESIZE, posBeforeMove.y))).getValue();
+        float right = tiles.get(new TileIndex(new Vector2(posBeforeMove.x + Game.TILESIZE, posBeforeMove.y))).getValue();
+        /*      System.out.println("up: " + up + ", down: " + down + ", left" + left + ", right: "+ right);*/
 
 
         target[0] = up;
@@ -230,8 +309,6 @@ public class SnakeLevel {
 /*        System.out.println("target: " + Arrays.toString(target));
         Vector2 foodDirection = getDirection(move, getFoodPosition());
         System.out.println("foodDirection: " + (foodDirection.x/Game.TILESIZE) + "," +(foodDirection.y/Game.TILESIZE));*/
-
-
 
 
         // Avoid wall/body
@@ -274,12 +351,12 @@ public class SnakeLevel {
     }
 
     public Vector2 getDirection(Vector2 a, Vector2 b) {
-        return new Vector2(b.x - a.x, b.y-a.y);
+        return new Vector2(b.x - a.x, b.y - a.y);
     }
 
     public int getDirectionInteger(Vector2 a, Vector2 b) {
 
-        Vector2 direction = getDirection(a,b);
+        Vector2 direction = getDirection(a, b);
 
         if (Math.abs(direction.x) > Math.abs(direction.y)) {
             if (direction.x > 0) {
