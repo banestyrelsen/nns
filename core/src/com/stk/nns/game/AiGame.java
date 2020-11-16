@@ -29,8 +29,8 @@ public class AiGame extends Game {
 
     public void create(BitmapFont mainFont, BitmapFont mainFontRed) {
         super.create(mainFont, mainFontRed);
-
         snakes = new ArrayList<>();
+        childNetworks = new ArrayList<>();
         snakeUpdateInterval = fastest;
         inputProcessor = new GameInputProcessor(camera, snake, this);
         firstGeneration();
@@ -43,35 +43,17 @@ public class AiGame extends Game {
 
     private void nextGeneration() {
         System.out.println("%%%%%%%%%%%%%%%%% GENERATION " + generation +" %%%%%%%%%%%%%%%%%");
-        Random rnd = new Random();
         generation++;
         currentSnakeIndex = 0;
-/*        if (allZeroPoints()) {
-            firstGeneration();
-        } else {*/
-            childNetworks = Recombinator.recombine(snakes, generation);
+        childNetworks = Recombinator.recombine(snakes, generation);
 
-            if (allZeroPoints()) {
-                List<Network> networks = new ArrayList<>();
-                for (int i = 0; i < childNetworks.size(); i++) {
-                    networks.add(new Network(4, 4, 3));
-                }
-                childNetworks = networks;
-            }
+
             snakes = new ArrayList<>();
             newGame();
   /*      }*/
     }
 
-    private boolean allZeroPoints() {
 
-        for (Snake snake : snakes) {
-            if (snake.getNumberOfFeedings() > 0) {
-                return false;
-            }
-        }
-        return true;
-    }
 
 
     protected void newGame() {
@@ -100,7 +82,7 @@ public class AiGame extends Game {
 /*        timeUntilStarvation = 4200;*/
         timeLeft = timeUntilStarvation;
 
-        snakeLevel.placeFood(new Vector2(64f, 128f));
+        snakeLevel.placeFood(new Vector2(1024f - 96f, 128f));
 
 
     }

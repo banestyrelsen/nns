@@ -11,15 +11,19 @@ public class Recombinator {
     private static Comparator<Snake> feedingComparator = (o1, o2) -> o2.getNumberOfFeedings().compareTo(o1.getNumberOfFeedings());
 
     public static List<Network> recombine(List<Snake> snakes, int generation) {
-/*        snakes.sort(lifeSpanComparator);*/
+        List<Network> childNetworks = new ArrayList<>();
+
+
+
+        /*        snakes.sort(lifeSpanComparator);*/
 /*        snakes.sort(distanceToFoodAtDeathComparator);*/
         snakes.sort(feedingComparator);
 
-        List<Network> childNetworks = new ArrayList<>();
-        if (snakes.size() == 1) {
+
+/*        if (snakes.size() == 1) {
             childNetworks.add(new Network(snakes.get(0).getNetwork(), snakes.get(0).getNetwork()));
             return childNetworks;
-        }
+        }*/
         System.out.println("%%%%%%%%%%%%%%%%%%%%%%%% TOP 10 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
             for (int i = 0; i < 10; i++) {
                 Snake snake = snakes.get(i);
@@ -27,7 +31,12 @@ public class Recombinator {
             }
 
 
-
+        if (allZeroPoints(snakes)) {
+            for (int i = 0; i < snakes.size(); i++) {
+                childNetworks.add(new Network(4, 4, 3));
+            }
+            return childNetworks;
+        }
 
 
         int pass = 0;
@@ -52,7 +61,7 @@ public class Recombinator {
             }
             pass++;
         }
-
+        System.out.println("After recombination");
 /*        Collections.reverse(childNetworks);*/
 
         return childNetworks;
@@ -68,5 +77,15 @@ public class Recombinator {
         }
         return roll <= attractiveness;
 
+    }
+
+    private static  boolean allZeroPoints(List<Snake> snakes) {
+
+        for (Snake snake : snakes) {
+            if (snake.getNumberOfFeedings() > 0) {
+                return false;
+            }
+        }
+        return true;
     }
 }

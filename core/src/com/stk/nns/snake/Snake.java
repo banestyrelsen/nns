@@ -45,7 +45,7 @@ public class Snake {
     Brain brain;
 
     public final Control control;
-    int MOVES_LEFT_MAX = 100;
+    int MOVES_LEFT_MAX = 80;
     int movesLeft = MOVES_LEFT_MAX;
 
     Network network;
@@ -239,13 +239,13 @@ public class Snake {
 
 
         input[3] = foodDirectionInput;
-/*        System.out.println("----------------------------------------");
-        System.out.println(printDirection(leftKey, forwardKey, rightKey));
-        System.out.println("Food is " +  getDirection(foodDirectionKey));*/
 
         double[] output = network.calculate(input);
 
-/*        System.out.println(Arrays.toString(input));
+  /*              System.out.println("----------------------------------------");
+        System.out.println(printDirection(leftKey, forwardKey, rightKey));
+        System.out.println("Food is " +  getDirection(foodDirectionKey));
+        System.out.println(Arrays.toString(input));
         System.out.println(Arrays.toString(output));*/
 
         if (output.length != 3) throw new IllegalStateException("Invalid output length");
@@ -264,101 +264,11 @@ public class Snake {
         } else if (largestIndex == 2) {
             nextMove = rightKey;
         }
-/*        System.out.println("Recommendation " + getDirection(nextMove));
-        System.out.println("Snake chose: "  + getDirection(nextMove) + " (index "+largestIndex+")");*/
-        return input;
-    }
-
-    public double[] aiSetNextMove() {
-        System.out.println("\n----------------------------------------------------------------------------------------------------");
-        /*        network.print();*/
-        double[] input = snakeLevel.getNeighborTiles(body.get(0));
-        if (input.length != 8) {
-            throw new IllegalStateException("Input length must be 8");
-        }
-        input = getCartesianDirection(body.get(0), snakeLevel.getFoodPosition(), input);
-
-
-        output = network.calculate(input);
-
-        System.out.println("input[0]: " + input[0] + " = up value");
-        System.out.println("input[1]: " + input[1] + " = down value");
-        System.out.println("input[2]: " + input[2] + " = left value");
-        System.out.println("input[3]: " + input[3] + " = right value");
-        System.out.println("input[4]: " + input[4] + " = up food?");
-        System.out.println("input[5]: " + input[5] + " = down food?");
-        System.out.println("input[6]: " + input[6] + " = left food?");
-        System.out.println("input[7]: " + input[7] + " = right food?");
-
-
-/*        System.out.println("input: " + Arrays.toString(input));
-        System.out.println("output: " + Arrays.toString(output));*/
-
-
-        if (output.length != 4) {
-            throw new IllegalStateException("Output must be equal to 4");
-        }
-
-        double up = output[0];
-        double down = output[1];
-        double left = output[2];
-        double right = output[3];
-
-        System.out.println("\toutput[0]: " + output[0] + " = network UP recommendation");
-        System.out.println("\toutput[1]: " + output[1] + " = network DOWN recommendation");
-        System.out.println("\toutput[2]: " + output[2] + " = network LEFT recommendation");
-        System.out.println("\toutput[3]: " + output[3] + " = network RIGHT recommendation");
-
-
-        double largest = Integer.MIN_VALUE;
-        int largestIndex = -1;
-        for (int i = 0; i < output.length; i++) {
-            if (output[i] > largest) {
-                largest = output[i];
-                largestIndex = i;
-            }
-        }
-        int move = Input.Keys.UP;
-        switch (largestIndex) {
-            case 0:
-                move = Input.Keys.UP;
-                break;
-            case 1:
-                move = Input.Keys.DOWN;
-                break;
-            case 2:
-                move = Input.Keys.LEFT;
-                break;
-            case 3:
-                move = Input.Keys.RIGHT;
-                break;
-        }
-
-
-/*
-        if (move < down) {
-            move = Input.Keys.DOWN;
-        }
-        if (move < left) {
-            move = Input.Keys.LEFT;
-        }
-        if (move < right) {
-            move = Input.Keys.RIGHT;
-        }*/
-        if (move == Input.Keys.LEFT) {
-            System.out.println("\t\tSnake chooses LEFT");
-        } else if (move == Input.Keys.RIGHT) {
-            System.out.println("\t\tSnake chooses RIGHT");
-        } else if (move == Input.Keys.UP) {
-            System.out.println("\t\tSnake chooses UP");
-        } else if (move == Input.Keys.DOWN) {
-            System.out.println("\t\tSnake chooses DOWN");
-        }
-        setNextMove(move);
+/*        System.out.println("Recommendation " + getDirection(nextMove));*/
+/*        System.out.println("Snake chose: "  + getDirection(nextMove) + " (index "+largestIndex+")");*/
 
         return input;
     }
-
 
     private boolean isMoveLegal(int move) {
         boolean isLegal = !(
@@ -437,97 +347,18 @@ public class Snake {
         return finalLifeSpan;
     }
 
-    public boolean isAlive() {
-        return isAlive;
-    }
-
     public Network getNetwork() {
         return network;
-    }
-
-    public double[] getCartesianDirection(Vector2 snakeHead, Vector2 foodPosition, double[] input) {
-
-        Vector2 direction = new Vector2(foodPosition.x - snakeHead.x, foodPosition.y - snakeHead.y);
-
-        System.out.println("Food direction: " + direction.x + "," + direction.y);
-
-        input[4] = 0f;
-        input[5] = 0f;
-        input[6] = 0f;
-        input[7] = 0f;
-
-
-        if (Math.abs(direction.x) > Math.abs(direction.y)) {
-            // Left or right
-            if (direction.x > 0) {
-                /*return Snake.RIGHT;*/
-                System.out.println("food is RIGHT");
-                input[7] = 1.0f;
-            } else {
-                System.out.println("food is LEFT");
-                /*                return Snake.LEFT;*/
-                input[6] = 1.0f;
-            }
-        } else {
-            // Up or down
-            if (direction.y > 0) {
-                System.out.println("food is UP");
-                /*                return Snake.UP;*/
-                input[4] = 1.0f;
-            } else {
-                System.out.println("food is DOWN");
-                /*                return Snake.DOWN;*/
-                input[5] = 1.0f;
-            }
-        }
-        return input;
-    }
-
-    public int getLastMove() {
-        return lastMove;
     }
 
     public Float getDistanceToFoodAtDeath() {
         return distanceToFoodAtDeath;
     }
 
-    private double[] getTarget(double[] input) {
-        System.out.println("input[0]: " + input[0] + " = up value");
-        System.out.println("input[1]: " + input[1] + " = down value");
-        System.out.println("input[2]: " + input[2] + " = left value");
-        System.out.println("input[3]: " + input[3] + " = right value");
-        System.out.println("input[4]: " + input[4] + " = up food?");
-        System.out.println("input[5]: " + input[5] + " = down food?");
-        System.out.println("input[6]: " + input[6] + " = left food?");
-        System.out.println("input[7]: " + input[7] + " = right food?");
-
-        double[] target = new double[4];
-
-        for (int i = 0; i < 4; i++) {
-            target[i] = input[i];
-        }
-
-        int foodIndex = getLargestIndex(input, 4, 7) - 4;
-
-        if (target[foodIndex] > SnakeLevel.SNAKE_HEAD) {
-            target[foodIndex] = SnakeLevel.FOOD;
-        }
-
-        System.out.println("input: " + Arrays.toString(input));
-        System.out.println("target: " + Arrays.toString(target));
-/*        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }*/
-
-        return target;
-    }
-
     private int getLargestIndex(double[] array, int start, int end) {
         double largest = Double.MIN_VALUE;
         int largestIndex = -1;
-        for (int i = start; i < end; i++) {
+        for (int i = start; i <= end; i++) {
             if (array[i] > largest) {
                 largest = array[i];
                 largestIndex = i;
