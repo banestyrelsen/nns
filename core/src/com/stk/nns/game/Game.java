@@ -11,7 +11,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.input.GameInputProcessor;
-import com.stk.nns.map.SnakeLevel;
+import com.stk.nns.map.GameBoard;
 import com.stk.nns.snake.Control;
 import com.stk.nns.snake.Snake;
 import com.stk.nns.sound.PlaySound;
@@ -26,7 +26,7 @@ public abstract class Game {
     static Texture textureSnakeHead;
     static Texture textureSnakeBody;
     static Texture tileFood;
-    SnakeLevel snakeLevel;
+    GameBoard gameBoard;
     protected OrthographicCamera camera;
     GameInputProcessor inputProcessor;
 
@@ -131,17 +131,17 @@ public abstract class Game {
             if (snake.eat()) {
                 if (snake.control == Control.AI_CONTROLLED) {
                     if (snake.getNumberOfFeedings() == 1) {
-                        snakeLevel.placeFood(new Vector2(256f, 256f));
+                        gameBoard.placeFood(new Vector2(256f, 256f));
                     } else if (snake.getNumberOfFeedings() == 2) {
-                        snakeLevel.placeFood(new Vector2(768f, 768f));
+                        gameBoard.placeFood(new Vector2(768f, 768f));
                     }else if (snake.getNumberOfFeedings() == 3) {
-                        snakeLevel.placeFood(new Vector2(768f, 256f));
+                        gameBoard.placeFood(new Vector2(768f, 256f));
                     } else {
-                        snakeLevel.placeFood();
+                        gameBoard.placeFood();
                     }
 
                 } else {
-                    snakeLevel.placeFood();
+                    gameBoard.placeFood();
                 }
             }
 
@@ -186,7 +186,7 @@ public abstract class Game {
 
         batch.begin();
         // Draw level
-        snakeLevel.render(batch, tileWall, tileFood, textureSnakeHead, textureSnakeBody);
+        gameBoard.render(batch, tileWall, tileFood, textureSnakeHead, textureSnakeBody);
 
         // Draw snake
 /*        snake.render(batch, tileWall, tileHead);*/

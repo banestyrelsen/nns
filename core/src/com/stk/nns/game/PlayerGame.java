@@ -3,7 +3,7 @@ package com.stk.nns.game;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.input.GameInputProcessor;
-import com.stk.nns.map.SnakeLevel;
+import com.stk.nns.map.GameBoard;
 import com.stk.nns.snake.Snake;
 import com.stk.nns.sound.PlaySound;
 
@@ -26,8 +26,8 @@ public class PlayerGame extends Game {
     protected void newGame() {
 
         GAME_OVER = false;
-        snakeLevel = new SnakeLevel("maps/map0.map");
-        snake = new Snake(new Vector2(480f, 576), snakeLevel, playSound);
+        gameBoard = new GameBoard("maps/map0.map");
+        snake = new Snake(new Vector2(480f, 576), gameBoard, playSound);
 
         inputProcessor.setSnake(snake);
 
@@ -41,7 +41,7 @@ public class PlayerGame extends Game {
         timeUntilStarvation = 10200;
         timeLeft = timeUntilStarvation;
 
-        snakeLevel.placeFood();
+        gameBoard.placeFood();
         inputProcessor.setSnake(snake);
 
     }

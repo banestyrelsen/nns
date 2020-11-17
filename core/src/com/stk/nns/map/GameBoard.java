@@ -7,13 +7,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.Main;
 import com.stk.nns.game.Game;
-import com.stk.nns.snake.Snake;
 
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-public class SnakeLevel {
+public class GameBoard {
 
     public final static float SOLID = -1.0f;
     public final static float SNAKE = -0.9f;
@@ -32,7 +31,10 @@ public class SnakeLevel {
     public static int WIDTH;
     public static int HEIGHT;
 
-    public SnakeLevel(String fileName) {
+    private int BOARD_WIDTH_PIXELS;
+    private int BOARD_HEIGHT_PIXELS;
+
+    public GameBoard(String fileName) {
         tiles = new LinkedHashMap<>();
 
         List<String> lines = readFile(fileName);
@@ -40,6 +42,8 @@ public class SnakeLevel {
         HEIGHT = lines.size();
         WIDTH = lines.get(0).length();
 
+        BOARD_WIDTH_PIXELS = WIDTH * Game.TILESIZE;
+        BOARD_HEIGHT_PIXELS = HEIGHT * Game.TILESIZE;
 
         StringBuilder sb = new StringBuilder();
         for (int y = 0; y < lines.size(); y++) {
@@ -304,7 +308,7 @@ public List<Vector2> getEmptyPositions() {
             target[3] = actual;
         }
 
-        target[getDirectionInteger(move, getFoodPosition())] = SnakeLevel.FOOD;
+        target[getDirectionInteger(move, getFoodPosition())] = GameBoard.FOOD;
 
 /*        System.out.println("target: " + Arrays.toString(target));
         Vector2 foodDirection = getDirection(move, getFoodPosition());
@@ -377,4 +381,18 @@ public List<Vector2> getEmptyPositions() {
     public float getDistanceToFood(Vector2 snakeHead) {
         return getDirection(this.foodPosition, snakeHead).len();
     }
+
+    public Tile getTileAtPosition(Vector2 position) {
+        if (position.x >= 0 && position.y >= 0 && position.x <= BOARD_WIDTH_PIXELS + Game.TILESIZE && position.y <= BOARD_HEIGHT_PIXELS + Game.TILESIZE) {
+
+            int x = (int)position.x - ((int)position.x % Game.TILESIZE);
+            int y = (int)position.y - ((int)position.y % Game.TILESIZE);
+
+            Vector2 pos = new Vector2((float)x, (float)y);
+            return tiles.get(new TileIndex(pos));
+        }
+        return null;
+    }
+
+
 }

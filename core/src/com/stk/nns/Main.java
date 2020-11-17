@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.stk.nns.game.AiGame;
+import com.stk.nns.game.Pathing;
 import com.stk.nns.game.PlayerGame;
 import com.stk.nns.input.MenuInputProcessor;
 import com.stk.nns.menu.Menu;
@@ -16,18 +17,23 @@ public class Main extends ApplicationAdapter {
 
     PlayerGame playerGame;
     AiGame aiGame;
+    Pathing pathing;
+
     PlaySound playSound;
     Menu menu;
     BitmapFont mainFont;
     BitmapFont mainFontRed;
     MenuInputProcessor menuInputProcessor;
 
+
+
     private Mode mode = Mode.MENU;
     public static Mode newMode = Mode.MENU;
     public enum Mode {
         MENU,
         PLAY,
-        AI
+        AI,
+        PATHING
 
     }
 
@@ -41,6 +47,8 @@ public class Main extends ApplicationAdapter {
                     Gdx.input.setInputProcessor(playerGame.getGameInputProcessor());
                 case AI:
                     Gdx.input.setInputProcessor(aiGame.getGameInputProcessor());
+                case PATHING:
+                    Gdx.input.setInputProcessor(pathing.getInputProcessor());
             }
         }
     }
@@ -69,6 +77,8 @@ public class Main extends ApplicationAdapter {
 
         aiGame = new AiGame(playSound);
         aiGame.create(mainFont,mainFontRed);
+        pathing = new Pathing();
+        pathing.create();
 
         menuInputProcessor = new MenuInputProcessor();
         Gdx.input.setInputProcessor(menuInputProcessor);
@@ -80,6 +90,11 @@ public class Main extends ApplicationAdapter {
     private void update() {
         if (newMode != mode) {
             setMode(newMode);
+        }
+
+        if (mode == Mode.PATHING) {
+            pathing.update();
+            pathing.render();
         }
     }
 

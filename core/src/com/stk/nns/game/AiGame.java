@@ -3,7 +3,7 @@ package com.stk.nns.game;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.input.GameInputProcessor;
-import com.stk.nns.map.SnakeLevel;
+import com.stk.nns.map.GameBoard;
 import com.stk.nns.nn.Network;
 import com.stk.nns.nn.Recombinator;
 import com.stk.nns.snake.Snake;
@@ -12,7 +12,6 @@ import com.stk.nns.sound.PlaySound;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class AiGame extends Game {
 
@@ -61,14 +60,14 @@ public class AiGame extends Game {
             snakeUpdateInterval = 0;
         }*/
         GAME_OVER = false;
-        snakeLevel = new SnakeLevel("maps/map0.map");
+        gameBoard = new GameBoard("maps/map0.map");
         Network network;
         if (generation == 1) {
             network = new Network(4, 4, 3);
         } else {
              network = childNetworks.get(currentSnakeIndex);
         }
-        snakes.add(new Snake(new Vector2(512f, 512), snakeLevel, playSound, network));
+        snakes.add(new Snake(new Vector2(512f, 512), gameBoard, playSound, network));
         snake = snakes.get(snakes.size()-1);
         inputProcessor.setSnake(snake);
 
@@ -82,7 +81,8 @@ public class AiGame extends Game {
 /*        timeUntilStarvation = 4200;*/
         timeLeft = timeUntilStarvation;
 
-        snakeLevel.placeFood(new Vector2(1024f - 96f, 128f));
+        gameBoard.placeFood(new Vector2(128f, 512f));
+        // gameBoard.placeFood(new Vector2(1024f - 96f, 128f));
 
 
     }

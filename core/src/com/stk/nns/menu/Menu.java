@@ -11,10 +11,6 @@ public class Menu {
     SpriteBatch batch;
     BitmapFont mainFont;
 
-    enum MenuOptions{
-        PLAY_GAME
-    }
-
     public Menu(PlaySound playSound, BitmapFont mainFont) {
         this.playSound = playSound;
         this.batch = new SpriteBatch();
@@ -34,6 +30,7 @@ public class Menu {
 
         return "1. Play\n"
                 +"2. AI Play\n"
+                +"3. Pathing\n"
                 + "Q. Quit";
 
     }

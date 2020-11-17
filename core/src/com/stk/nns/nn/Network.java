@@ -1,9 +1,7 @@
 package com.stk.nns.nn;
 
-import com.stk.nns.map.SnakeLevel;
-import com.stk.nns.snake.Snake;
+import com.stk.nns.map.GameBoard;
 
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -220,7 +218,7 @@ for (int i = 0; i < 1; i++) {
         System.out.println("input[7]: "+ input[7] + " = right food?");
 */
 
-        double[] input = new double[]{SnakeLevel.EMPTY,SnakeLevel.EMPTY,SnakeLevel.EMPTY,SnakeLevel.EMPTY, 0d,0d,1.0d,0d};
+        double[] input = new double[]{GameBoard.EMPTY, GameBoard.EMPTY, GameBoard.EMPTY, GameBoard.EMPTY, 0d,0d,1.0d,0d};
         double[] target = new double[]{0,0,1,0};
 
         for (int i = 0; i < 1000; i++) {

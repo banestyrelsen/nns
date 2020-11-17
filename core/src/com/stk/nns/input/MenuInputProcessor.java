@@ -14,6 +14,9 @@ public class MenuInputProcessor implements InputProcessor  {
         if (keycode == Input.Keys.NUM_2 || keycode == Input.Keys.NUMPAD_2) {
             Main.newMode = Main.Mode.AI;
         }
+        if (keycode == Input.Keys.NUM_3 || keycode == Input.Keys.NUMPAD_3) {
+            Main.newMode = Main.Mode.PATHING;
+        }
         if (keycode == Input.Keys.Q || keycode == Input.Keys.ESCAPE) {
             Gdx.app.exit();
         }

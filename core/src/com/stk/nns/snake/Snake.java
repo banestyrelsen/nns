@@ -7,11 +7,10 @@ import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.Main;
 import com.stk.nns.nn.Network;
 import com.stk.nns.sound.PlaySound;
-import com.stk.nns.map.SnakeLevel;
+import com.stk.nns.map.GameBoard;
 import com.stk.nns.nn.Brain;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -29,7 +28,7 @@ public class Snake {
 
     Vector2 direction;
 
-    private final int startingLength = 8;
+    private final int startingLength = 6;
     private int lastMove = Input.Keys.UP;
     private int nextMove = Input.Keys.UP;
     int nFeedings = 0;
@@ -41,7 +40,7 @@ public class Snake {
 
     PlaySound playSound;
 
-    SnakeLevel snakeLevel;
+    GameBoard gameBoard;
     Brain brain;
 
     public final Control control;
@@ -52,26 +51,26 @@ public class Snake {
     float distanceToFoodAtDeath = Float.MAX_VALUE;
 
     // Constructor for player controlled snake
-    public Snake(Vector2 startPos, SnakeLevel snakeLevel, PlaySound playSound) {
+    public Snake(Vector2 startPos, GameBoard gameBoard, PlaySound playSound) {
         this.control = Control.PLAYER_CONTROLLED;
         body = new LinkedList<>();
         body.add(new Vector2(startPos.x, startPos.y));
         for (int i = 1; i < startingLength; i++) {
             body.add(new Vector2(startPos.x, startPos.y - Main.TILESIZE));
         }
-        this.snakeLevel = snakeLevel;
+        this.gameBoard = gameBoard;
         this.playSound = playSound;
         this.direction = new Vector2(0, -1);
     }
 
-    public Snake(Vector2 startPos, SnakeLevel snakeLevel, PlaySound playSound, Network network) {
+    public Snake(Vector2 startPos, GameBoard gameBoard, PlaySound playSound, Network network) {
         this.control = Control.AI_CONTROLLED;
         body = new LinkedList<>();
         body.add(new Vector2(startPos.x, startPos.y));
         for (int i = 1; i < startingLength; i++) {
             body.add(new Vector2(startPos.x, startPos.y - Main.TILESIZE));
         }
-        this.snakeLevel = snakeLevel;
+        this.gameBoard = gameBoard;
         this.playSound = playSound;
         this.direction = new Vector2(0, -1);
 
@@ -132,7 +131,7 @@ public class Snake {
 
             isAlive = false;
             finalLifeSpan = Instant.now().toEpochMilli() - born.toEpochMilli();
-            distanceToFoodAtDeath = snakeLevel.getDistanceToFood(newHead);
+            distanceToFoodAtDeath = gameBoard.getDistanceToFood(newHead);
 
 /*            for (int i = 0; i < 1000; i++) {
 
@@ -152,7 +151,7 @@ public class Snake {
         Vector2 prevHead = body.getFirst();
         body.addFirst(newHead);
         Vector2 removedSegment = body.removeLast();
-        snakeLevel.updateSnakePosition(newHead, prevHead, removedSegment);
+        gameBoard.updateSnakePosition(newHead, prevHead, removedSegment);
 
 
         lastMove = move;
@@ -180,7 +179,7 @@ public class Snake {
     }
 
     public double[] aiMove() {
-        int forwardKey = snakeLevel.getDirectionKeyInteger(body.get(0), body.get(1));
+        int forwardKey = gameBoard.getDirectionKeyInteger(body.get(0), body.get(1));
         int leftKey = -1;
         int rightKey = -1;
 
@@ -210,9 +209,9 @@ public class Snake {
             throw new IllegalStateException("Invalid value(s) for left/forward/right");
         }
 
-        double[] input = snakeLevel.getTileOptions(body.get(0), leftKey, forwardKey, rightKey);
+        double[] input = gameBoard.getTileOptions(body.get(0), leftKey, forwardKey, rightKey);
 
-        int foodDirectionKey = snakeLevel.getFoodDirection(body.get(0), lastMove, forwardKey);
+        int foodDirectionKey = gameBoard.getFoodDirection(body.get(0), lastMove, forwardKey);
 
         float foodDirectionInput = Float.MIN_VALUE;
         if (foodDirectionKey == forwardKey) {
@@ -295,12 +294,12 @@ public class Snake {
             }
         }*/
 
-        return snakeLevel.collide(head);
+        return gameBoard.collide(head);
 
     }
 
     public boolean eat() {
-        if (snakeLevel.getFoodPosition().equals(body.get(0))) {
+        if (gameBoard.getFoodPosition().equals(body.get(0))) {
             grow();
             MOVES_LEFT_MAX++;
             movesLeft = MOVES_LEFT_MAX;

@@ -1,7 +1,7 @@
 package com.stk.nns.nn;
 
 import com.badlogic.gdx.Input;
-import com.stk.nns.map.SnakeLevel;
+import com.stk.nns.map.GameBoard;
 import com.stk.nns.map.Tile;
 
 import java.util.List;
@@ -9,12 +9,12 @@ import java.util.List;
 public class Brain {
 
     Network network;
-    SnakeLevel snakeLevel;
+    GameBoard gameBoard;
     List<Tile> tiles;
 
-    public Brain(SnakeLevel snakeLevel) {
-        this.snakeLevel = snakeLevel;
-        this.tiles = snakeLevel.getTileValues();
+    public Brain(GameBoard gameBoard) {
+        this.gameBoard = gameBoard;
+        this.tiles = gameBoard.getTileValues();
         this.network = new Network(tiles.size());
     }
 
