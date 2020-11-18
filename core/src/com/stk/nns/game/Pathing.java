@@ -24,6 +24,9 @@ public class Pathing extends ApplicationAdapter {
     Color color_empty = Color.BLACK;
     Color color_path = Color.YELLOW;
 
+    boolean pathStartSet = false;
+    Tile pathStart = null;
+    Tile pathEnd = null;
 
     @Override
     public void create() {
@@ -39,6 +42,7 @@ public class Pathing extends ApplicationAdapter {
         inputProcessor = new PathingTestInputProcessor(camera);
         Gdx.input.setInputProcessor(inputProcessor);
         inputProcessor.setGameBoard(gameBoard);
+        inputProcessor.setPathing(this);
 
     }
 
@@ -58,14 +62,17 @@ public class Pathing extends ApplicationAdapter {
         Gdx.gl.glClearColor(0,0,0,1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         shapeRenderer.setProjectionMatrix(camera.combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
 
         for (Map.Entry<TileIndex, Tile> entry :  gameBoard.getTiles().entrySet()) {
             Tile tile = entry.getValue();
             if (tile.getValue() == GameBoard.SOLID) {
                 /*                shapeRenderer.point(tile.getPosition().x, tile.getPosition().y, 0);*/
-                shapeRenderer.setColor(color_solid);
-                shapeRenderer.box(tile.getPosition().x, tile.getPosition().y, 0, Game.TILESIZE, Game.TILESIZE, 0);
+                drawShape(tile.getPosition().x, tile.getPosition().y, Game.TILESIZE, Game.TILESIZE, color_solid);
+/*                shapeRenderer.setColor(color_solid);
+                shapeRenderer.rect(tile.getPosition().x, tile.getPosition().y, Game.TILESIZE, Game.TILESIZE);*/
+/*                shapeRenderer.box(tile.getPosition().x+1, tile.getPosition().y+1, 0, Game.TILESIZE-1, Game.TILESIZE-1, 0);*/
                 /*               System.out.println(tile.getPosition().x +Game.TILESIZE) + " , " + tile.getPosition().y);*/
 /*                drawShape(tile.getPosition().x, tile.getPosition().y, tile.getPosition().x +Game.TILESIZE ,
                         tile.getPosition().y + Game.TILESIZE, color_solid);*/
@@ -81,20 +88,45 @@ public class Pathing extends ApplicationAdapter {
 
         }
         shapeRenderer.end();
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        drawGrid();
+        highlightGridOnMouseOver();
+
+
+
+        drawPath();
+
+    }
+
+    private void drawGrid() {
+        // Draw grid
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        for (int x = 0; x < GameBoard.BOARD_WIDTH_PIXELS; x += Game.TILESIZE) {
+            shapeRenderer.line(x, 0, x, GameBoard.BOARD_HEIGHT_PIXELS, Color.GRAY, Color.GRAY);
+        }
+        for (int y = 0; y < GameBoard.BOARD_HEIGHT_PIXELS; y += Game.TILESIZE) {
+            shapeRenderer.line(0, y, GameBoard.BOARD_WIDTH_PIXELS, y, Color.GRAY, Color.GRAY);
+        }
+        shapeRenderer.end();
+
+    }
+
+    private void highlightGridOnMouseOver() {
         // Highlight
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         Tile mouseTile = gameBoard.getTileAtPosition(inputProcessor.getMousePosition());
         if (null != mouseTile ) {
-            if (mouseTile.getValue() == GameBoard.EMPTY) {
+            drawShape(mouseTile.getPosition().x, mouseTile.getPosition().y, Game.TILESIZE, Game.TILESIZE, Color.GREEN);
+/*            shapeRenderer.rect();*/
+/*            if (mouseTile.getValue() == GameBoard.EMPTY) {
 
             } else if (mouseTile.getValue() == GameBoard.SOLID) {
                 shapeRenderer.setColor(color_empty);
-            }
-            shapeRenderer.box(mouseTile.getPosition().x, mouseTile.getPosition().y, 0, Game.TILESIZE, Game.TILESIZE, 0);
+            }*/
+/*            shapeRenderer.line(mouseTile.getPosition().x, mouseTile.getPosition().y, mouseTile.getPosition().x + Game.TILESIZE, mouseTile.getPosition().y + Game.TILESIZE, Color.WHITE, Color.WHITE);*/
+/*            shapeRenderer.box(mouseTile.getPosition().x, mouseTile.getPosition().y, 0, Game.TILESIZE, Game.TILESIZE, 0);*/
         }
         shapeRenderer.end();
     }
-
 
     private void drawShape(float x, float y, float width, float height, Color color) {
         shapeRenderer.rect(x, y, width, height, color, color, color, color);
@@ -104,6 +136,42 @@ public class Pathing extends ApplicationAdapter {
 
     }
 
+    private void drawPath() {
+        if (pathStart != null) {
+            if (pathEnd != null) {
+                drawLine(pathStart.getPosition(), pathEnd.getPosition(), Game.TILESIZE / 2, Color.WHITE);
+            } else {
+                drawLine(pathStart.getPosition(), inputProcessor.getMousePosition(), Game.TILESIZE / 2, Color.WHITE);
+/*                Tile mouseTile = gameBoard.getTileAtPosition(inputProcessor.getMousePosition());*/
+/*                if (mouseTile != null) {
+                    drawLine(pathStart.getPosition(), mouseTile.getPosition(), Game.TILESIZE / 2, Color.WHITE);
+                }*/
+            }
 
+        }
 
+    }
+
+    private void drawLine(Vector2 a, Vector2 b, int pixelOffset, Color color) {
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.line(
+                a.x + pixelOffset,
+                a.y + pixelOffset,
+                b.x + pixelOffset,
+                b.y + pixelOffset,
+                color, color);
+        shapeRenderer.end();
+    }
+
+    public void setPathPosition(Tile tile) {
+        if (pathStart != null && pathEnd != null) {
+            pathStart = tile;
+            pathEnd = null;
+        } else if (pathStart == null) {
+            pathStart = tile;
+            pathEnd = null;
+        } else {
+            this.pathEnd = tile;
+        }
+    }
 }

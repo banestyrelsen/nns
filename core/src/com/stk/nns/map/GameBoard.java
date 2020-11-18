@@ -31,8 +31,8 @@ public class GameBoard {
     public static int WIDTH;
     public static int HEIGHT;
 
-    private int BOARD_WIDTH_PIXELS;
-    private int BOARD_HEIGHT_PIXELS;
+    public static int BOARD_WIDTH_PIXELS;
+    public static int BOARD_HEIGHT_PIXELS;
 
     public GameBoard(String fileName) {
         tiles = new LinkedHashMap<>();

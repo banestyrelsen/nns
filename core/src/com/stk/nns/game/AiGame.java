@@ -81,8 +81,8 @@ public class AiGame extends Game {
 /*        timeUntilStarvation = 4200;*/
         timeLeft = timeUntilStarvation;
 
-        gameBoard.placeFood(new Vector2(128f, 512f));
-        // gameBoard.placeFood(new Vector2(1024f - 96f, 128f));
+/*        gameBoard.placeFood(new Vector2(128f, 512f));*/
+        gameBoard.placeFood(new Vector2(1024f - 96f, 128f));
 
 
     }
