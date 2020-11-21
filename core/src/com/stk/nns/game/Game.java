@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.input.GameInputProcessor;
 import com.stk.nns.map.GameBoard;
+import com.stk.nns.pathfinding.Pathfinder;
 import com.stk.nns.snake.Control;
 import com.stk.nns.snake.Snake;
 import com.stk.nns.sound.PlaySound;
@@ -74,7 +75,6 @@ public abstract class Game {
         textureSnakeHead = textureSnakeHead == null ? new Texture("tile_head.png") : textureSnakeHead;
         textureSnakeBody  = textureSnakeBody == null ? new Texture("tile_snake_body.png") : textureSnakeBody;
         tileFood = tileFood == null ? new Texture("tile_food.png") : tileFood;
-
 
     }
 
@@ -186,7 +186,7 @@ public abstract class Game {
 
         batch.begin();
         // Draw level
-        gameBoard.render(batch, tileWall, tileFood, textureSnakeHead, textureSnakeBody);
+        gameBoard.render(batch, tileWall, tileFood, textureSnakeHead, textureSnakeBody, camera);
 
         // Draw snake
 /*        snake.render(batch, tileWall, tileHead);*/

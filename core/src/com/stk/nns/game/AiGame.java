@@ -7,6 +7,7 @@ import com.stk.nns.input.GameInputProcessor;
 import com.stk.nns.map.GameBoard;
 import com.stk.nns.nn.Network;
 import com.stk.nns.nn.Recombinator;
+import com.stk.nns.pathfinding.Pathfinder;
 import com.stk.nns.snake.Snake;
 import com.stk.nns.sound.PlaySound;
 
@@ -34,6 +35,7 @@ public class AiGame extends Game {
         childNetworks = new ArrayList<>();
         snakeUpdateInterval = fastest;
         inputProcessor = new GameInputProcessor(camera, snake, this);
+
         firstGeneration();
     }
 

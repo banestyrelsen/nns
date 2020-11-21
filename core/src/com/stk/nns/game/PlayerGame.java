@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.input.GameInputProcessor;
 import com.stk.nns.map.GameBoard;
+import com.stk.nns.pathfinding.Pathfinder;
 import com.stk.nns.snake.Snake;
 import com.stk.nns.sound.PlaySound;
 

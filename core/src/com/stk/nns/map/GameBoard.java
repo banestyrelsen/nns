@@ -2,11 +2,16 @@ package com.stk.nns.map;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.Main;
 import com.stk.nns.game.Game;
+import com.stk.nns.pathfinding.Pathfinder;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -25,6 +30,7 @@ public class GameBoard {
     private Vector2 foodPosition;
 
     Random rnd = new Random();
+    ShapeRenderer shapeRenderer;
 
     LinkedHashMap<TileIndex, Tile> tiles;
 
@@ -35,9 +41,12 @@ public class GameBoard {
     public static int BOARD_HEIGHT_PIXELS;
 
     private Tile[][] grid;
+    Pathfinder pathfinder;
+    List<Tile> path;
 
     public GameBoard(String fileName) {
         tiles = new LinkedHashMap<>();
+        shapeRenderer = new ShapeRenderer();
 
         List<String> lines = readFile(fileName);
 
@@ -49,6 +58,8 @@ public class GameBoard {
 
         StringBuilder sb = new StringBuilder();
         grid = new Tile[GameBoard.WIDTH][GameBoard.HEIGHT];
+
+        pathfinder = new Pathfinder();
 
         for (int y = 0; y < lines.size(); y++) {
             String line = lines.get(y);
@@ -73,8 +84,8 @@ public class GameBoard {
 
         for (Entry<TileIndex, Tile> entry : tiles.entrySet()) {
             Tile tile = entry.getValue();
-            int x = (int)tile.getPosition().x / Game.TILESIZE;
-            int y = (int)tile.getPosition().y / Game.TILESIZE;
+            int x = (int) tile.getPosition().x / Game.TILESIZE;
+            int y = (int) tile.getPosition().y / Game.TILESIZE;
             tile.x = x;
             tile.y = y;
 
@@ -119,7 +130,10 @@ public class GameBoard {
         return Arrays.asList(mapAsString.split(System.lineSeparator()));
     }
 
-    public void render(SpriteBatch batch, Texture tileWall, Texture foodTile, Texture tileHead, Texture textureSnakeBody) {
+    public void render(SpriteBatch batch, Texture tileWall, Texture foodTile, Texture tileHead, Texture textureSnakeBody, OrthographicCamera camera) {
+
+        batch.setProjectionMatrix(camera.combined);
+        shapeRenderer.setProjectionMatrix(camera.combined);
 
         for (Entry<TileIndex, Tile> entry : tiles.entrySet()) {
             Tile tile = entry.getValue();
@@ -133,6 +147,26 @@ public class GameBoard {
                 batch.draw(tileHead, tile.getPosition().x, tile.getPosition().y);
             }
         }
+        /*drawRoute();*/
+    }
+
+    private void drawRoute() {
+        if (path != null && path.size() > 2) {
+            for (int i = 1; i < path.size() - 1; i++) {
+                drawLine(path.get(i).getPosition(), path.get(i + 1).getPosition(), Game.TILESIZE / 2, Color.WHITE);
+            }
+        }
+    }
+
+    private void drawLine(Vector2 a, Vector2 b, int pixelOffset, Color color) {
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.line(
+                a.x + pixelOffset,
+                a.y + pixelOffset,
+                b.x + pixelOffset,
+                b.y + pixelOffset,
+                color, color);
+        shapeRenderer.end();
     }
 
     public void placeFood() {
@@ -217,7 +251,17 @@ public class GameBoard {
 
     public int getFoodDirection(Vector2 snakeHead, int lastMove, int forward) {
 
-        Vector2 foodDirection = getDirection(snakeHead, foodPosition);
+
+        path = pathfinder.getPath(getTile(snakeHead), getTile(foodPosition), this);
+        Vector2 foodDirection;
+        if (path.size() > 1) {
+            foodDirection = getDirection(snakeHead, path.get(1).getPosition());
+        } else {
+            foodDirection = getDirection(snakeHead, foodPosition);
+        }
+
+
+        /*        Vector2 foodDirection = getDirection(snakeHead, foodPosition);*/
 
         int direction;
 

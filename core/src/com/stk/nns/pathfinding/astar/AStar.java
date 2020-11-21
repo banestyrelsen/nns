@@ -87,7 +87,7 @@ public class AStar {
 
     private boolean expand(RouteNode node) {
         current = node;
-        System.out.println("NODE: " + node.id);
+
         if (node.getTile().x == targetTile.x && node.getTile().y == targetTile.y) {
             return true;
         }
@@ -171,7 +171,7 @@ public class AStar {
         for (int x = 0; x < grid.length; x++) {
             for (int y = 0; y < grid.length; y++) {
                 Tile tile = grid[x][y];
-                if (tile.getValue() != GameBoard.SOLID) {
+                if (tile.getValue() != GameBoard.SOLID && tile.getValue() != GameBoard.SNAKE) {
                     RouteNode node = new RouteNode(tile, getDistance(tile.x, tile.y), 0);
                     allNodes.put(node.id, node);
 

@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.stk.nns.Main;
 import com.stk.nns.nn.Network;
+import com.stk.nns.pathfinding.Pathfinder;
 import com.stk.nns.sound.PlaySound;
 import com.stk.nns.map.GameBoard;
 import com.stk.nns.nn.Brain;
@@ -49,7 +50,6 @@ public class Snake {
 
     Network network;
     float distanceToFoodAtDeath = Float.MAX_VALUE;
-
     // Constructor for player controlled snake
     public Snake(Vector2 startPos, GameBoard gameBoard, PlaySound playSound) {
         this.control = Control.PLAYER_CONTROLLED;
@@ -73,7 +73,6 @@ public class Snake {
         this.gameBoard = gameBoard;
         this.playSound = playSound;
         this.direction = new Vector2(0, -1);
-
         if (control == Control.AI_CONTROLLED) {
             this.network = network;
         }
