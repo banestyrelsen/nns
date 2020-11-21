@@ -73,7 +73,6 @@ public class PathingTestInputProcessor implements InputProcessor {
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         this.mouseDragPosition =  VectorUtils.unproject(camera, new Vector2(screenX, screenY));
-        System.out.println("DRAAAAG " + mouseDragPosition.x + " , " + mouseDragPosition.y);
         mouseButtonTouchDownAction(button, mouseDragPosition);
         return false;
     }
@@ -90,9 +89,9 @@ public class PathingTestInputProcessor implements InputProcessor {
             // Zoom in
             if (camera.zoom > 1) {
                 // Zoom faster if far away
-                camera.zoom += 0.15;
+                camera.zoom -= 0.15;
             }
-            camera.zoom += 0.05;
+            camera.zoom -= 0.05;
             if (camera.zoom < 0.05f) {
                 camera.zoom = 0.05f;
             }
@@ -100,10 +99,10 @@ public class PathingTestInputProcessor implements InputProcessor {
             // Zoom out
             if (camera.zoom > 1) {
                 // Zoom faster if far away
-                camera.zoom -= 0.15;
+                camera.zoom += 0.15;
             }
 
-            camera.zoom -= 0.05;
+            camera.zoom += 0.05;
             if (camera.zoom > 5.0f) {
                 camera.zoom = 5.0f;
             }

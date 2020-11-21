@@ -6,11 +6,15 @@ public class Tile {
 
     private float value;
     private final Vector2 position;
+    public int x;
+    public int y;
 
+    public Tile[] connections;
 
     public Tile(float value, Vector2 pos) {
         this.value = value;
         this.position = pos;
+        this.connections = new Tile[4];
     }
 
     public float getValue() {

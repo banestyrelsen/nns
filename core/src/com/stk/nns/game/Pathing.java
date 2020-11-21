@@ -7,11 +7,14 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.stk.nns.input.PathingTestInputProcessor;
 import com.stk.nns.map.GameBoard;
 import com.stk.nns.map.Tile;
 import com.stk.nns.map.TileIndex;
+import com.stk.nns.pathfinding.astar.AStar;
 
+import java.util.List;
 import java.util.Map;
 
 public class Pathing extends ApplicationAdapter {
@@ -28,21 +31,30 @@ public class Pathing extends ApplicationAdapter {
     Tile pathStart = null;
     Tile pathEnd = null;
 
+    List<Tile> path;
+    AStar aStar;
     @Override
     public void create() {
         shapeRenderer = new ShapeRenderer();
-        gameBoard = new GameBoard("maps/map0.map");
-
+        gameBoard = new GameBoard("maps/test.map");
 
 
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        camera.zoom = 2.0f;
+
+        resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        System.out.println("camera.position: " + camera.position.x + "m " + camera.position.y + " , " + camera.position.z);
+        /*        camera.translate(new Vector3(GameBoard.BOARD_WIDTH_PIXELS / 2f, GameBoard.BOARD_HEIGHT_PIXELS / 2f, 0f));*/
+        /*camera.zoom = 2.0f;*/
+        camera.position.set(new Vector3(GameBoard.BOARD_WIDTH_PIXELS / 2f, GameBoard.BOARD_HEIGHT_PIXELS / 2f, 0f));
         camera.update();
         inputProcessor = new PathingTestInputProcessor(camera);
         Gdx.input.setInputProcessor(inputProcessor);
         inputProcessor.setGameBoard(gameBoard);
         inputProcessor.setPathing(this);
+
+        aStar = new AStar();
+        path = aStar.getPath(gameBoard.getGrid()[2][2], gameBoard.getGrid()[4][6], gameBoard);
 
     }
 
@@ -59,41 +71,29 @@ public class Pathing extends ApplicationAdapter {
     @Override
     public void render() {
         camera.update();
-        Gdx.gl.glClearColor(0,0,0,1);
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         shapeRenderer.setProjectionMatrix(camera.combined);
-shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
 
-        for (Map.Entry<TileIndex, Tile> entry :  gameBoard.getTiles().entrySet()) {
-            Tile tile = entry.getValue();
-            if (tile.getValue() == GameBoard.SOLID) {
-                /*                shapeRenderer.point(tile.getPosition().x, tile.getPosition().y, 0);*/
-                drawShape(tile.getPosition().x, tile.getPosition().y, Game.TILESIZE, Game.TILESIZE, color_solid);
-/*                shapeRenderer.setColor(color_solid);
-                shapeRenderer.rect(tile.getPosition().x, tile.getPosition().y, Game.TILESIZE, Game.TILESIZE);*/
-/*                shapeRenderer.box(tile.getPosition().x+1, tile.getPosition().y+1, 0, Game.TILESIZE-1, Game.TILESIZE-1, 0);*/
-                /*               System.out.println(tile.getPosition().x +Game.TILESIZE) + " , " + tile.getPosition().y);*/
-/*                drawShape(tile.getPosition().x, tile.getPosition().y, tile.getPosition().x +Game.TILESIZE ,
-                        tile.getPosition().y + Game.TILESIZE, color_solid);*/
-
-
-/*            } else if (tile.getValue() == FOOD) {
-                batch.draw(foodTile, tile.getPosition().x, tile.getPosition().y);
-            } else if (tile.getValue() == SNAKE) {
-                batch.draw(textureSnakeBody, tile.getPosition().x, tile.getPosition().y);
-            } else if (tile.getValue() == SNAKE_HEAD) {
-                batch.draw(tileHead, tile.getPosition().x, tile.getPosition().y);*/
+        Tile[][] grid = gameBoard.getGrid();
+        for (int x = 0; x < grid.length; x++) {
+            for (int y = 0; y < grid[x].length; y++) {
+                Tile tile = grid[x][y];
+                if (tile.getValue() == GameBoard.SOLID) {
+                    drawShape(tile.getPosition().x, tile.getPosition().y, Game.TILESIZE, Game.TILESIZE, color_solid);
+                }
             }
-
         }
+
+
         shapeRenderer.end();
         drawGrid();
+        drawRoute();
         highlightGridOnMouseOver();
 
-
-
-        drawPath();
+/*        drawPath();*/
 
     }
 
@@ -114,16 +114,16 @@ shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         // Highlight
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         Tile mouseTile = gameBoard.getTileAtPosition(inputProcessor.getMousePosition());
-        if (null != mouseTile ) {
+        if (null != mouseTile) {
             drawShape(mouseTile.getPosition().x, mouseTile.getPosition().y, Game.TILESIZE, Game.TILESIZE, Color.GREEN);
-/*            shapeRenderer.rect();*/
+            /*            shapeRenderer.rect();*/
 /*            if (mouseTile.getValue() == GameBoard.EMPTY) {
 
             } else if (mouseTile.getValue() == GameBoard.SOLID) {
                 shapeRenderer.setColor(color_empty);
             }*/
-/*            shapeRenderer.line(mouseTile.getPosition().x, mouseTile.getPosition().y, mouseTile.getPosition().x + Game.TILESIZE, mouseTile.getPosition().y + Game.TILESIZE, Color.WHITE, Color.WHITE);*/
-/*            shapeRenderer.box(mouseTile.getPosition().x, mouseTile.getPosition().y, 0, Game.TILESIZE, Game.TILESIZE, 0);*/
+            /*            shapeRenderer.line(mouseTile.getPosition().x, mouseTile.getPosition().y, mouseTile.getPosition().x + Game.TILESIZE, mouseTile.getPosition().y + Game.TILESIZE, Color.WHITE, Color.WHITE);*/
+            /*            shapeRenderer.box(mouseTile.getPosition().x, mouseTile.getPosition().y, 0, Game.TILESIZE, Game.TILESIZE, 0);*/
         }
         shapeRenderer.end();
     }
@@ -137,12 +137,12 @@ shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
     }
 
     private void drawPath() {
-        if (pathStart != null) {
-            if (pathEnd != null) {
+        if (pathStart != null && pathStart.getValue() != GameBoard.SOLID) {
+            if (pathEnd != null && pathEnd.getValue() != GameBoard.SOLID) {
                 drawLine(pathStart.getPosition(), pathEnd.getPosition(), Game.TILESIZE / 2, Color.WHITE);
             } else {
                 drawLine(pathStart.getPosition(), inputProcessor.getMousePosition(), Game.TILESIZE / 2, Color.WHITE);
-/*                Tile mouseTile = gameBoard.getTileAtPosition(inputProcessor.getMousePosition());*/
+                /*                Tile mouseTile = gameBoard.getTileAtPosition(inputProcessor.getMousePosition());*/
 /*                if (mouseTile != null) {
                     drawLine(pathStart.getPosition(), mouseTile.getPosition(), Game.TILESIZE / 2, Color.WHITE);
                 }*/
@@ -150,6 +150,17 @@ shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         }
 
+    }
+
+    private void drawRoute() {
+        if (pathStart != null && pathStart.getValue() != GameBoard.SOLID && pathEnd == null) {
+            drawLine(pathStart.getPosition(), inputProcessor.getMousePosition(), Game.TILESIZE / 2, Color.WHITE);
+        }
+        if (path != null && path.size() > 1) {
+            for (int i = 0; i < path.size()-1; i++) {
+                drawLine(path.get(i).getPosition(), path.get(i+1).getPosition(), Game.TILESIZE / 2, Color.WHITE);
+            }
+        }
     }
 
     private void drawLine(Vector2 a, Vector2 b, int pixelOffset, Color color) {
@@ -172,6 +183,14 @@ shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
             pathEnd = null;
         } else {
             this.pathEnd = tile;
+            path = aStar.getPath(pathStart, pathEnd, gameBoard);
         }
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        camera.viewportWidth = width;
+        camera.viewportHeight = height;
+        camera.position.set(width / 2f, height / 2f, 0); //by default camera position on (0,0,0)
     }
 }

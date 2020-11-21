@@ -15,6 +15,10 @@ public class DesktopLauncher {
 		config.foregroundFPS = 60;
 		config.backgroundFPS = 60;
 		config.vSyncEnabled = false;
+
+		// Window position
+		config.x = -2000;
+		config.y = 200;
 		new LwjglApplication(new Main(), config);
 	}
 }

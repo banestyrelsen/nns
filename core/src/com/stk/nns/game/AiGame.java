@@ -2,6 +2,7 @@ package com.stk.nns.game;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.stk.nns.input.GameInputProcessor;
 import com.stk.nns.map.GameBoard;
 import com.stk.nns.nn.Network;
@@ -29,6 +30,7 @@ public class AiGame extends Game {
     public void create(BitmapFont mainFont, BitmapFont mainFontRed) {
         super.create(mainFont, mainFontRed);
         snakes = new ArrayList<>();
+        camera.position.set(new Vector3(GameBoard.BOARD_WIDTH_PIXELS / 2f, GameBoard.BOARD_HEIGHT_PIXELS / 2f, 0f));
         childNetworks = new ArrayList<>();
         snakeUpdateInterval = fastest;
         inputProcessor = new GameInputProcessor(camera, snake, this);

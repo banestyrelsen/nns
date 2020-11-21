@@ -305,11 +305,15 @@ public class Snake {
             movesLeft = MOVES_LEFT_MAX;
             nFeedings++;
             lastAte = Instant.now();
-            playSound.eat();
+            if (control == Control.PLAYER_CONTROLLED) {
+                playSound.eat();
+            }
             if (nFeedings == 0) {
                 shouldBurp = false;
             } else if (nFeedings % 5 == 0) {
-                shouldBurp = true;
+                if (control == Control.PLAYER_CONTROLLED) {
+                    shouldBurp = true;
+                }
             }
             return true;
         }

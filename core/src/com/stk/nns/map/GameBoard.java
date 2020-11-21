@@ -34,6 +34,8 @@ public class GameBoard {
     public static int BOARD_WIDTH_PIXELS;
     public static int BOARD_HEIGHT_PIXELS;
 
+    private Tile[][] grid;
+
     public GameBoard(String fileName) {
         tiles = new LinkedHashMap<>();
 
@@ -46,6 +48,8 @@ public class GameBoard {
         BOARD_HEIGHT_PIXELS = HEIGHT * Game.TILESIZE;
 
         StringBuilder sb = new StringBuilder();
+        grid = new Tile[GameBoard.WIDTH][GameBoard.HEIGHT];
+
         for (int y = 0; y < lines.size(); y++) {
             String line = lines.get(y);
             /*          System.out.println(line);
@@ -67,6 +71,26 @@ public class GameBoard {
         }
 
 
+        for (Entry<TileIndex, Tile> entry : tiles.entrySet()) {
+            Tile tile = entry.getValue();
+            int x = (int)tile.getPosition().x / Game.TILESIZE;
+            int y = (int)tile.getPosition().y / Game.TILESIZE;
+            tile.x = x;
+            tile.y = y;
+
+            grid[x][y] = tile;
+
+/*            for (int y = Game.TILESIZE-1; y >= 0; y--) {
+                for (int x = 0; x < Game.TILESIZE; x++) {
+                    grid[x][y] = tile;
+                    s.append(grid[x][y].getValue());
+                }
+            s.append("\n");
+            }*/
+        }
+
+
+
         /*        System.out.println("Done");*/
 
         /*                System.out.println(sb);*/
@@ -77,13 +101,18 @@ public class GameBoard {
             if (tile.getPosition().x == 1024) {
                 System.out.println("\n");
             }
-        }*/
-/*        System.out.println("ORDERED KEYS");
+        }
+        System.out.println("ORDERED KEYS");
         for (Entry<TileIndex,Tile> entry:  tiles.entrySet()) {
             System.out.println(entry.getKey().position);
         }
         System.out.println("<<<<<<<<<<<<<<<--------------------->");*/
     }
+
+    public Tile[][] getGrid() {
+        return grid;
+    }
+
 
     private List<String> readFile(String fileName) {
         String mapAsString = Gdx.files.internal(fileName).readString();    //creates a new file instance
@@ -255,10 +284,11 @@ public class GameBoard {
     }
 
     public List<Vector2> getObstacles() {
-        return obstacles;  }
+        return obstacles;
+    }
 
 
-public List<Vector2> getEmptyPositions() {
+    public List<Vector2> getEmptyPositions() {
         return emptyPositions;
     }
 
@@ -385,10 +415,10 @@ public List<Vector2> getEmptyPositions() {
     public Tile getTileAtPosition(Vector2 position) {
         if (position.x >= 0 && position.y >= 0 && position.x <= BOARD_WIDTH_PIXELS + Game.TILESIZE && position.y <= BOARD_HEIGHT_PIXELS + Game.TILESIZE) {
 
-            int x = (int)position.x - ((int)position.x % Game.TILESIZE);
-            int y = (int)position.y - ((int)position.y % Game.TILESIZE);
+            int x = (int) position.x - ((int) position.x % Game.TILESIZE);
+            int y = (int) position.y - ((int) position.y % Game.TILESIZE);
 
-            Vector2 pos = new Vector2((float)x, (float)y);
+            Vector2 pos = new Vector2((float) x, (float) y);
             return tiles.get(new TileIndex(pos));
         }
         return null;
