@@ -64,7 +64,7 @@ public class AiGame extends Game {
             snakeUpdateInterval = 0;
         }*/
         GAME_OVER = false;
-        gameBoard = new GameBoard("maps/map0.map");
+        gameBoard = new GameBoard("maps/map1.map");
         Network network;
         if (generation == 1) {
             network = new Network(4, 4, 3);

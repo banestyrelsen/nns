@@ -21,6 +21,14 @@ public class RouteNode implements Comparable<RouteNode> {
         predecessor = null;
     }
 
+    public RouteNode(RouteNode original, RouteNode predecessor) {
+        this.tile = original.tile;
+        this.h = original.h;
+        this.g = original.g;
+        this.id = tile.x + "," + tile.y;
+        this.predecessor = predecessor;
+    }
+
     public int getF() {
         return h + g;
     }

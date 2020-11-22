@@ -42,8 +42,8 @@ public class AStar {
 
         initNodes();
 
-        open.add(start);
 
+        open.add(start);
 /*        while(!open.isEmpty()) {
             RouteNode node = open.poll();
             System.out.println(node.id + ": \t" + node.getF() );
@@ -145,7 +145,7 @@ public class AStar {
     private void addConnection(List<RouteNode> connections, RouteNode node, RouteNode potentialConnection) {
         RouteNode previouslyClosed = closed.get(potentialConnection.id);
         if (previouslyClosed == null || previouslyClosed.getF() > potentialConnection.getF()) {
-            connections.add(potentialConnection);
+            connections.add(new RouteNode(potentialConnection, node));
         }
     }
 

@@ -121,9 +121,11 @@ public class PathingTestInputProcessor implements InputProcessor {
             switch (button) {
                 case 0: // left mouse button
                     tile.setValue(GameBoard.SOLID);
+                    pathing.updatePath();
                     break;
                 case 1: // right mouse button
                     tile.setValue(GameBoard.EMPTY);
+                    pathing.updatePath();
                     break;
                 case 2: // middle mouse button
                     if (Instant.now().toEpochMilli() - lastPathChange.toEpochMilli() > 50) {

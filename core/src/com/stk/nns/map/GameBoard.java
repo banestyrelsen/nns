@@ -61,6 +61,8 @@ public class GameBoard {
 
         pathfinder = new Pathfinder();
 
+        Collections.reverse(lines);
+
         for (int y = 0; y < lines.size(); y++) {
             String line = lines.get(y);
             /*          System.out.println(line);
@@ -68,7 +70,7 @@ public class GameBoard {
             for (int x = 0; x < line.length(); x++) {
                 float value = Float.parseFloat(String.valueOf(line.charAt(x))) == 1.0f ? SOLID : EMPTY;
                 Tile tile = new Tile(value,
-                        new Vector2(x * Main.TILESIZE, lines.size() - y * Main.TILESIZE + Main.TILESIZE * 32 - 64));
+                        new Vector2(x * Main.TILESIZE, y * Main.TILESIZE));
                 tiles.put(new TileIndex(tile.getPosition()), tile);
 
                 sb.append((int) tile.getPosition().x + "," + (int) tile.getPosition().y + " ");
@@ -147,12 +149,12 @@ public class GameBoard {
                 batch.draw(tileHead, tile.getPosition().x, tile.getPosition().y);
             }
         }
-        /*drawRoute();*/
+        drawRoute();
     }
 
     private void drawRoute() {
-        if (path != null && path.size() > 2) {
-            for (int i = 1; i < path.size() - 1; i++) {
+        if (path != null && path.size() > 1) {
+            for (int i = 0; i < path.size() - 1; i++) {
                 drawLine(path.get(i).getPosition(), path.get(i + 1).getPosition(), Game.TILESIZE / 2, Color.WHITE);
             }
         }

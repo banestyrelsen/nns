@@ -36,7 +36,7 @@ public class Pathing extends ApplicationAdapter {
     @Override
     public void create() {
         shapeRenderer = new ShapeRenderer();
-        gameBoard = new GameBoard("maps/test.map");
+        gameBoard = new GameBoard("maps/map0.map");
 
 
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -54,7 +54,7 @@ public class Pathing extends ApplicationAdapter {
         inputProcessor.setPathing(this);
 
         aStar = new AStar();
-        path = aStar.getPath(gameBoard.getGrid()[2][2], gameBoard.getGrid()[4][6], gameBoard);
+        path = aStar.getPath(gameBoard.getGrid()[1][1], gameBoard.getGrid()[4][2], gameBoard);
 
     }
 
@@ -192,5 +192,11 @@ public class Pathing extends ApplicationAdapter {
         camera.viewportWidth = width;
         camera.viewportHeight = height;
         camera.position.set(width / 2f, height / 2f, 0); //by default camera position on (0,0,0)
+    }
+
+    public void updatePath() {
+        if (pathStart != null && pathEnd != null) {
+            path = aStar.getPath(pathStart, pathEnd, gameBoard);
+        }
     }
 }
